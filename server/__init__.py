@@ -1,5 +1,9 @@
 from flask import Flask, g
-from .model.db import DB
+from server.model.db import DB
+from server.route.admin.admin import admin
+from server.route.borrower.borrower import borrower
+from server.route.librarian.librarian import librarian
+from server.route.common_route import common
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -12,10 +16,22 @@ def create_app():
     if app.config["ENVIRONMENT"] == 'testing':
         app.config.from_object('server.config.TestingConfig')
 
-    with app.app_context():
-        g.DB = DB(app.config["CONNECTION_STRING"])
-
     from .model.seed import seed_db
     seed_db.init_app(app)
+
+    app.register_blueprint(admin)
+    app.register_blueprint(borrower)
+    app.register_blueprint(librarian)
+    app.register_blueprint(common)
+
+    db = DB(app.config["CONNECTION_STRING"])
+    Session = db.get_sessionmaker()
+
+    @app.before_request
+    def load_session():
+        g.Session = Session
+
+    print(app.url_map)
+
 
     return app
