@@ -11,4 +11,14 @@ class BorrowerService(BaseService):
     @transactional
     def register(self, name: str, email: str, password: str) -> None:
         user_repo = UserAccountRepository(self.session)
+
+        # Check email duplication
+        duplicate = True
+        try:
+            user_repo.get_user_by_email(email)
+        except NoResultFound:
+            duplicate = False
+        if duplicate:
+            raise Exception("Email is duplicated")
+
         user_repo.insert_user(name, email, password, AccountType.BORROWER)
