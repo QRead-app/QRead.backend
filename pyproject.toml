@@ -10,12 +10,12 @@ requires-python = ">=3.11"
 dependencies = [
     "flask (>=3.1.1,<4.0.0)",
     "sqlalchemy (>=2.0.42,<3.0.0)",
-    "alembic (>=1.16.4,<2.0.0)"
+    "alembic (>=1.16.4,<2.0.0)",
+    "psycopg2-binary (>=2.9.10,<3.0.0)"
 ]
 
 [tool.poetry]
-packages = [{include = "qread"}]
-
+package-mode = false
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
