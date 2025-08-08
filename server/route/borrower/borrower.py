@@ -1,5 +1,5 @@
 from flask import Blueprint, g, jsonify, request
-from utils.sanitization import is_email
+from server.utils.sanitization import is_email
 from server.model.service.borrower.borrower_service import BorrowerService
 
 borrower = Blueprint('borrower', __name__, url_prefix="/borrower")
