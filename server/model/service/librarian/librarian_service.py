@@ -9,12 +9,12 @@ class LibrarianService(BaseService):
         super().__init__(Session)
 
     @transactional
-    def authenticate(self, email: str, password: str) -> bool:
-            user_repo = UserAccountRepository(self.session)
+    def register(self, email: str, password: str) -> bool:
+        user_repo = UserAccountRepository(self.session)
 
-            try:
-                user_repo.get_user_by_email_password(email, password, AccountType.ADMIN)
-            except NoResultFound: 
-                return False
-            
-            return True
+        try:
+            user_repo.get_user_by_email_password(email, password, AccountType.ADMIN)
+        except NoResultFound: 
+            return False
+        
+        return True

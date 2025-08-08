@@ -9,12 +9,6 @@ class BorrowerService(BaseService):
         super().__init__(Session)
 
     @transactional
-    def authenticate(self, email: str, password: str) -> bool:
-            user_repo = UserAccountRepository(self.session)
-
-            try:
-                user_repo.get_user_by_email_password(email, password, AccountType.ADMIN)
-            except NoResultFound: 
-                return False
-            
-            return True
+    def register(self, name: str, email: str, password: str) -> None:
+        user_repo = UserAccountRepository(self.session)
+        user_repo.insert_user(name, email, password, AccountType.BORROWER)
