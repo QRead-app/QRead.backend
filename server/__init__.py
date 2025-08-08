@@ -1,19 +1,21 @@
-from flask import Flask
+from flask import Flask, g
+from .model.db import DB
 
-def create_app(config_name='development'):
+def create_app():
     app = Flask(__name__, instance_relative_config=True)
+    app.config.from_pyfile('config.py', silent=False)
 
-    if config_name == 'development':
-        app.config.from_object('config.DevelopmentConfig')
-    if config_name == 'production':
-        app.config.from_object('config.ProductionConfig')
-    if config_name == 'testing':
-        app.config.from_object('config.TestingConfig')
+    if app.config["ENVIRONMENT"] == 'development':
+        app.config.from_object('server.config.DevelopmentConfig')
+    if app.config["ENVIRONMENT"] == 'production':
+        app.config.from_object('server.config.ProductionConfig')
+    if app.config["ENVIRONMENT"] == 'testing':
+        app.config.from_object('server.config.TestingConfig')
 
-    app.config.from_pyfile('config.py', silent=True)
-    
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
+    with app.app_context():
+        g.DB = DB(app.config["CONNECTION_STRING"])
+
+    from .model.seed import seed_db
+    seed_db.init_app(app)
 
     return app

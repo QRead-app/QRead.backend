@@ -1,1 +1,3 @@
 SECRET_KEY = ''
+CONNECTION_STRING = ''
+ENVIRONMENT = "development"
