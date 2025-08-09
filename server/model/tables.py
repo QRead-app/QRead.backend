@@ -1,4 +1,5 @@
 import enum
+import re
 
 from typing import List, Optional
 from datetime import datetime
@@ -38,6 +39,10 @@ class User(Base):
 
     def __repr__(self):
         return f"id: {self.id}, name: {self.name}, email: {self.email}, password: {self.password}, account_type: {self.account_type}"
+
+    @staticmethod
+    def is_email(email: str) -> bool:
+        return re.search("^.+@.+[.].+$", email) != None
 
 class Book(Base):
     __tablename__ = "book"
