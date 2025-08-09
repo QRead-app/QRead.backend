@@ -1,4 +1,5 @@
 from functools import wraps
+from server.exceptions import DatabaseError
 
 def transactional(method):
     @wraps(method)
@@ -7,6 +8,6 @@ def transactional(method):
             with self.Session.begin() as self.session:
                 return method(self, *args, **kwargs)
         except:
-            raise Exception("Database operation failed")
+            raise DatabaseError("Database operation failed")
         
     return wrapper
