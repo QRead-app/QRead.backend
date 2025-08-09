@@ -67,7 +67,7 @@ This project includes our backend built with Flask, providing all the necessary 
 
 #### Running a migration
 
-- Skip this and <b>Seeding the database</b> if you are using Kayne's neondb as I have already set everything up
+- Skip this and <b>Seeding the database</b> if you are using Wayne's neondb as I have already set everything up
 - To upgrade to the latest migration
   ```sh
   alembic upgrade head
@@ -89,7 +89,7 @@ This project includes our backend built with Flask, providing all the necessary 
 
 #### Seeding the database
 
-- Skip this if you are using Kayne's neondb as I have already set everything up
+- Skip this if you are using Wayne's neondb as I have already set everything up
 - Seed command
   ```sh
   Flask --app seed-db run
