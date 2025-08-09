@@ -7,9 +7,12 @@ def requires_auth(method):
     @wraps(method)
     def wrapper(account_type: AccountType, *args, **kwargs):
         if (
-            "session" not in session or
-            session["session"]["account_type"] != account_type or
-            not CommonService(g.Session).verify(session["session"]["email"], session["session"]["account_type"])
+            "session" not in session
+            or session["session"]["account_type"] != account_type
+            or not CommonService(g.Session).verify(
+                session["session"]["email"], 
+                session["session"]["account_type"]
+            )
         ):
             return jsonify({"message": "Unauthorised"}), 401
         
