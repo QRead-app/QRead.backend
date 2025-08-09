@@ -15,7 +15,7 @@ def requires_auth(account_type):
                     session["session"]["account_type"]
                 )
             ):
-                return jsonify({"message": "Unauthorized"}), 401
+                return jsonify({"error": "Unauthorized"}), 401
 
             return method(*args, **kwargs)
         return wrapper

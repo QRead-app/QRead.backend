@@ -1,5 +1,5 @@
 from flask import Blueprint, g, jsonify, request, session
-from server.exceptions import BookAlreadyBorrowedError, DatabaseError, EmailAlreadyExistsError
+from server.exceptions import BookAlreadyBorrowedError, BookBorrowingError, DatabaseError, EmailAlreadyExistsError
 from server.model.tables import AccountType, Book, Fine, User
 from server.model.service.borrower.borrower_service import BorrowerService
 from server.route.requires_auth_wrapper import requires_auth
@@ -14,7 +14,7 @@ def register():
     password = data["password"]
 
     if not User.is_email(email):
-        return jsonify({"message": "Invalid Email"}), 400
+        return jsonify({"error": "Invalid Email"}), 400
     
     try:
         BorrowerService(g.Session).register(name, email, password)
@@ -34,7 +34,7 @@ def borrow():
     try:
         BorrowerService(g.Session).borrow_book(
             session["session"]["id"], book_ids)
-    except BookAlreadyBorrowedError as e:
+    except BookBorrowingError as e:
         return jsonify({"error": str(e)}), 400
     except DatabaseError as e:
         return jsonify({"error": str(e)}), 500
@@ -94,10 +94,11 @@ def get_fines():
 @requires_auth(AccountType.BORROWER)
 @borrower.route("/pay-fine", methods=["POST"])
 def get_fines():
-    fines: list[Fine] = []
+    data = request.json
+    fine_id = data["fine_id"]
+
     try:
-        fines = BorrowerService(g.Session).get_fines(
-            session["session"]["id"])
+        BorrowerService(g.Session).pay_fine(fine_id)
     except DatabaseError as e:
         return jsonify({"error": str(e)}), 500
     

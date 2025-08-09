@@ -14,7 +14,7 @@ def login(type: str):
     try:
         account_type = AccountType[type.upper()]
     except KeyError:
-        return jsonify({"message": f"Invalid path {type}"}), 404
+        return jsonify({"error": f"Invalid path {type}"}), 404
 
     common_service = CommonService(g.Session)
 

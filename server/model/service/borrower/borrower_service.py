@@ -111,4 +111,6 @@ class BorrowerService(BaseService):
         if fines is None:
             return []
         
+        
+        
         return fines
