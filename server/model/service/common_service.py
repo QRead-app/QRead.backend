@@ -1,31 +1,35 @@
+from server.exceptions import DatabaseError, IncorrectCredentialsError
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountType
+from server.model.tables import AccountType, User
 from server.model.repository.user_account_repository import UserAccountRepository
-from sqlalchemy.exc import NoResultFound
 
 class CommonService(BaseService):
     def __init__(self, Session):
         super().__init__(Session)
 
     @transactional
-    def authenticate(self, email: str, password: str, account_type: AccountType) -> bool:
+    def authenticate(self, email: str, password: str, account_type: AccountType) -> User:
             user_repo = UserAccountRepository(self.session)
 
-            try:
-                user_repo.get_user_by_email_password(email, password, account_type)
-            except NoResultFound: 
-                return False
+            user = user_repo.get_user(email = email, password = password, 
+                                        account_type = account_type)
             
-            return True
+            if len(user) == 0:
+                return IncorrectCredentialsError("Authentication failed")
+            if len(user) > 1:
+                return DatabaseError("Database record error")
+            
+            return user[0]
 
     @transactional
     def verify(self, email: str, account_type: AccountType) -> bool:
             user_repo = UserAccountRepository(self.session)
 
-            try:
-                user_repo.get_user_by_email_type(email, account_type)
-            except NoResultFound: 
+            result = user_repo.get_user(email = email, 
+                                        account_type = account_type)
+            
+            if len(result) == 0:
                 return False
             
             return True

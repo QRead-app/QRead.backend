@@ -1,6 +1,7 @@
 from flask import Blueprint, g, request, session, jsonify
+from server.exceptions import DatabaseError, IncorrectCredentialsError
 from server.model.service.common_service import CommonService
-from server.model.tables import AccountType
+from server.model.tables import AccountType, User
 
 common = Blueprint('common', __name__)
 
@@ -15,13 +16,18 @@ def login(type: str):
     except KeyError:
         return jsonify({"message": f"Invalid path {type}"}), 404
 
-    auth = CommonService(g.Session).authenticate(email, password, account_type)
+    common_service = CommonService(g.Session)
 
-    if auth:
-        session["session"] = {"email": email, "account_type": account_type.name}
-        return jsonify({"message": "Login successful"}), 200
-    
-    return jsonify({"message": "Authentication failed"}), 401
+    user : User;
+    try:
+        user = common_service.authenticate(email, password, account_type)
+    except IncorrectCredentialsError as e:
+        return jsonify({"error": str(e)}), 401
+    except DatabaseError as e:
+        return jsonify({"error": str(e)}), 500
+
+    session["session"] = {"id": user.id, "account_type": account_type.name}
+    return jsonify({"message": "Login successful"}), 200
 
 @common.route("/logout", methods=["POST"])
 def logout():
