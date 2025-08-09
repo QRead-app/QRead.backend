@@ -23,7 +23,8 @@ class BookCondition(enum.Enum):
     UNUSABLE = 8
 
 class Base(DeclarativeBase):
-    pass
+    def to_dict(self):
+        return {col.name: getattr(self, col.name) for col in self.__table__.columns}
 
 class User(Base):
     __tablename__ = "user_account"
@@ -39,7 +40,7 @@ class User(Base):
 
     def __repr__(self):
         return f"id: {self.id}, name: {self.name}, email: {self.email}, password: {self.password}, account_type: {self.account_type}"
-
+    
     @staticmethod
     def is_email(email: str) -> bool:
         return re.search("^.+@.+[.].+$", email) != None

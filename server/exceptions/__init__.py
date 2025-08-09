@@ -4,7 +4,7 @@ class ServiceError(Exception):
 class EmailAlreadyExistsError(ServiceError):
     pass
 
-class BookAlreadyBorrowedError(ServiceError):
+class BookBorrowingError(ServiceError):
     pass
 
 class IncorrectCredentialsError(ServiceError):
