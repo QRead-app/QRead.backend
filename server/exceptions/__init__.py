@@ -7,6 +7,9 @@ class EmailAlreadyExistsError(ServiceError):
 class BookBorrowingError(ServiceError):
     pass
 
+class RecordNotFoundError(ServiceError):
+    pass
+
 class IncorrectCredentialsError(ServiceError):
     pass
 
