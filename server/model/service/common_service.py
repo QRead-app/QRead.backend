@@ -16,9 +16,9 @@ class CommonService(BaseService):
                                         account_type = account_type)
             
             if len(user) == 0:
-                return IncorrectCredentialsError("Authentication failed")
+                raise IncorrectCredentialsError("Authentication failed")
             if len(user) > 1:
-                return DatabaseError("Database record error")
+                raise DatabaseError("Database record error")
             
             return user[0]
 
