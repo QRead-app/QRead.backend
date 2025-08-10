@@ -1,5 +1,5 @@
 from flask import Blueprint, g, jsonify, request, session
-from server.exceptions import BookBorrowingError, DatabaseError, EmailAlreadyExistsError
+from server.exceptions import BookBorrowingError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.tables import AccountType, Book, Fine, User
 from server.model.service.borrower.borrower_service import BorrowerService
 from server.route.requires_auth_wrapper import requires_auth
@@ -93,23 +93,17 @@ def get_fines():
 
 @requires_auth(AccountType.BORROWER)
 @borrower.route("/pay-fine", methods=["POST"])
-def get_fines():
+def pay_fine():
     data = request.json
     fine_id = data["fine_id"]
 
     try:
         BorrowerService(g.Session).pay_fine(fine_id)
+    except RecordNotFoundError as e:
+        return jsonify({"error": str(e)}), 404
     except DatabaseError as e:
         return jsonify({"error": str(e)}), 500
-    
-    if len(fines) == 0:
-        return jsonify({"message": "No fines found"}), 204
-    
-    fines_dict = []
-    for fine in fines:
-        fines_dict.append(fine.to_dict)
 
     return jsonify({
-        "message": "Fine(s) retrieved",
-        "data": fines_dict
+        "message": "Fine paid successfully",
     }), 200

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Tuple
-from server.exceptions import BookBorrowingError, EmailAlreadyExistsError
+from server.exceptions import BookBorrowingError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
@@ -104,13 +104,16 @@ class BorrowerService(BaseService):
     def pay_fine(self, id: str) -> list[Book]:
         fine_repo = FineRepository(self.session)
 
-        fines = fine_repo.get_fine(
-            user_id = id, paid = False
+        fine = fine_repo.get_fine(
+            id = id, paid = False
         )
 
-        if fines is None:
-            return []
+        if fine is None:
+            raise RecordNotFoundError(f"Fine {id} not found")
         
+        if len(fine) > 1:
+            raise DatabaseError("Database error")
         
+        fine[0].paid = True
         
-        return fines
+        return fine
