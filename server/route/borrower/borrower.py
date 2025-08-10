@@ -9,9 +9,16 @@ borrower = Blueprint('borrower', __name__, url_prefix="/borrower")
 @borrower.route("/register", methods=["POST"])
 def register():
     data = request.json
-    name = data["name"]
-    email = data["email"]
-    password = data["password"]
+    name = data.get("name")
+    email = data.get("email")
+    password = data.get("password")
+
+    if (
+        name is None
+        or email is None
+        or password is None
+    ):
+        return jsonify({"error": "Missing fields"}), 400
 
     if not User.is_email(email):
         return jsonify({"error": "Invalid Email"}), 400
@@ -29,7 +36,10 @@ def register():
 @borrower.route("/borrow", methods=["POST"])
 def borrow():
     data = request.json
-    book_ids = data["books"]
+    book_ids = data.get("books")
+
+    if book_ids is None:
+        return jsonify({"error": "Missing field"}), 400
 
     try:
         BorrowerService(g.Session).borrow_book(
@@ -95,7 +105,10 @@ def get_fines():
 @borrower.route("/pay-fine", methods=["POST"])
 def pay_fine():
     data = request.json
-    fine_id = data["fine_id"]
+    fine_id = data.get("fine_id")
+
+    if fine_id is None:
+        return jsonify({"error": "Missing field"}), 400
 
     try:
         BorrowerService(g.Session).pay_fine(fine_id)

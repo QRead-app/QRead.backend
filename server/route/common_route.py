@@ -8,14 +8,20 @@ common = Blueprint('common', __name__)
 @common.route("/<type>/login", methods=["POST"])
 def login(type: str):
     data = request.json
-    email = data["email"]
-    password = data["password"]
+    email = data.get("email")
+    password = data.get("password")
 
     try:
         account_type = AccountType[type.upper()]
     except KeyError:
         return jsonify({"error": f"Invalid path {type}"}), 404
 
+    if (
+        email is None
+        or password is None
+    ):
+        return jsonify({"error": "Missing fields"}), 400
+        
     common_service = CommonService(g.Session)
 
     user: User
