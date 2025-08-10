@@ -141,3 +141,9 @@ description = [
     "A tale of mystery in the dark woods.",
     "A tale of magic in the golden empire."
 ]
+
+fine_reason = [
+    "Damaged book",
+    "Lost book",
+    "Late return"
+]

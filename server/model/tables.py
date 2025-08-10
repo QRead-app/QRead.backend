@@ -77,7 +77,7 @@ class Fine(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id = mapped_column(ForeignKey("user_account.id"), nullable=False)
     transaction_id = mapped_column(ForeignKey("book_transaction.id"), nullable=False)
-    reason = Mapped[str]
+    reason: Mapped[str]
     amount = mapped_column(NUMERIC(precision=2), nullable=False)
     date: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
     paid: Mapped[bool] = mapped_column(server_default="False")

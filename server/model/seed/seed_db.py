@@ -5,7 +5,7 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 from ..db import DB
 from flask import Flask
-from .seeds import name, title, description
+from .seeds import name, title, description, fine_reason
 from ..tables import *
 from ..repository.user_account_repository import UserAccountRepository
 from ..repository.book_repository import BookRepository
@@ -35,6 +35,12 @@ def seed_db_command():
         book_repo = BookRepository(session)
         transaction_repo = BookTransactionRepository(session)
         fine_repo = FineRepository(session)
+        
+        # Truncate all tables
+        fine_repo.truncate_table()
+        transaction_repo.truncate_table()
+        book_repo.truncate_table()
+        user_account_repo.truncate_table()
 
         # Seed user accounts
         print("Seeding user accounts...")
@@ -45,7 +51,11 @@ def seed_db_command():
         for n in range(len(names)):
             type = random.sample(
                 [type.value for type in AccountType], counts=[1, 3, 5], k=1)[0]
-            user_account_repo.insert_user(names[n], emails[n], names[n].replace(" ", ""), AccountType(type).name)
+            user_account_repo.insert_user(
+                names[n], 
+                emails[n], 
+                names[n].replace(" ", ""), 
+                AccountType(type).name)
 
         # Seed books
         print("Seeding books...")
@@ -57,7 +67,11 @@ def seed_db_command():
             condition = random.sample(
                 [condition.value for condition in BookCondition], k=1)[0]
             author = name[random.randrange(len(name))]
-            book_repo.insert_book(titles[n], descriptions[n], author, BookCondition(condition).name)
+            book_repo.insert_book(
+                titles[n], 
+                descriptions[n], 
+                author, 
+                BookCondition(condition).name)
 
         session.flush()
 
@@ -67,11 +81,14 @@ def seed_db_command():
             transaction_name = names[random.randrange(len(names))]
             transaction_title = titles[random.randrange(len(titles))]
 
-            transaction_user = user_account_repo.get_user_by_email(generate_email(transaction_name))[0]
-            transaction_book = book_repo.get_books_by_title(transaction_title)[0][0]
+            transaction_user = user_account_repo.get_user(
+                email = generate_email(transaction_name))[0]
+            transaction_book = book_repo.get_book(
+                title = transaction_title)[0]
             due_date = datetime.now() + timedelta(days=14)
 
-            transaction = transaction_repo.insert_transaction(transaction_user.id, transaction_book.id, due_date)
+            transaction = transaction_repo.insert_transaction(
+                transaction_user.id, transaction_book.id, due_date)
             
             session.flush()
 
@@ -79,5 +96,9 @@ def seed_db_command():
                 continue
 
             amount = random.randint(10, 50) / Decimal(10)
+            reason = fine_reason[random.randrange(len(fine_reason))]
             
-            fine_repo.insert_fine(transaction_user.id, transaction.id, amount)
+            fine_repo.insert_fine(
+                transaction_user.id, transaction.id, amount, reason)
+
+        print("Committing changes...")

@@ -16,6 +16,7 @@ class FineRepository(BaseRepository):
         user_id: int | None = None, 
         transaction_id: int | None = None, 
         amount: decimal.Decimal | None = None, 
+        reason: str | None = None,
         date: datetime | None = None, 
         paid: bool | None = None
     ) -> list[Fine] | None:
@@ -30,6 +31,8 @@ class FineRepository(BaseRepository):
             filters.append(Fine.transaction_id == transaction_id)
         if amount is not None:
             filters.append(Fine.amount == amount)
+        if reason is not None:
+            filters.append(Fine.reason == reason)
         if date is not None:
             filters.append(Fine.date == date)
         if paid is not None:
@@ -43,10 +46,16 @@ class FineRepository(BaseRepository):
     def insert_fine(
         self, 
         user_id: int, 
-        transaction_id: int, 
-        amount: decimal.Decimal
+        transaction_id: int,
+        amount: decimal.Decimal,
+        reason: str,
     ) -> Fine:
-        fine = Fine(user_id = user_id, transaction_id = transaction_id, amount = amount)
+        fine = Fine(
+            user_id = user_id, 
+            transaction_id = transaction_id, 
+            reason = reason,
+            amount = amount
+        )
         self.session.add(fine)
         
         return fine
