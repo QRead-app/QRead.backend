@@ -39,7 +39,13 @@ class User(Base):
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="user")
 
     def __repr__(self):
-        return f"id: {self.id}, name: {self.name}, email: {self.email}, password: {self.password}, account_type: {self.account_type}"
+        return f"""
+            id: {self.id}, 
+            name: {self.name}, 
+            email: {self.email}, 
+            password: {self.password}, 
+            account_type: {self.account_type}
+        """
     
     @staticmethod
     def is_email(email: str) -> bool:
@@ -57,7 +63,13 @@ class Book(Base):
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="book")
 
     def __repr__(self):
-        return f"id: {self.id}, title: {self.title}, description: {self.description}, author: {self.author}, condition: {self.condition}"
+        return f"""
+            id: {self.id}, 
+            title: {self.title}, 
+            description: {self.description}, 
+            author: {self.author}, 
+            condition: {self.condition}
+        """
 
 class Fine(Base):
     __tablename__ = "fine"
@@ -74,7 +86,15 @@ class Fine(Base):
     transaction: Mapped["BookTransaction"] = relationship(back_populates="fine")
 
     def __repr__(self):
-        return f"id: {self.id}, user_id: {self.user_id}, transaction_id: {self.transaction_id}, amount: {self.amount}, date: {self.date}, paid: {self.paid}"
+        return f"""
+            id: {self.id}, 
+            user_id: {self.user_id}, 
+            transaction_id: {self.transaction_id}, 
+            reason: {self.reason}, 
+            amount: {self.amount}, 
+            date: {self.date}, 
+            paid: {self.paid}
+        """
 
 class BookTransaction(Base):
     __tablename__ = "book_transaction"
@@ -91,4 +111,11 @@ class BookTransaction(Base):
     fine: Mapped["Fine"] = relationship(back_populates="transaction")
 
     def __repr__(self):
-        return f"id: {self.id}, user_id: {self.user_id}, book_id: {self.book_id}, date: {self.date}, due: {self.due}, returned: {self.returned}"
+        return f"""
+            id: {self.id}, 
+            user_id: {self.user_id}, 
+            book_id: {self.book_id},
+            date: {self.date}, 
+            due: {self.due}, 
+            returned: {self.returned}
+        """
