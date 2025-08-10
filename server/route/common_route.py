@@ -18,7 +18,7 @@ def login(type: str):
 
     common_service = CommonService(g.Session)
 
-    user : User;
+    user: User
     try:
         user = common_service.authenticate(email, password, account_type)
     except IncorrectCredentialsError as e:
