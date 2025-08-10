@@ -10,34 +10,35 @@ from server.model.repository.user_account_repository import UserAccountRepositor
 def app():
     app = create_app()
 
-    user_repo = UserAccountRepository(g.Session)
+    with app.app_context():
+        user_repo = UserAccountRepository(g.Session)
 
-    # Insert test users
-    borrower = user_repo.insert_user(
-        name = test_borrower.name,
-        email = test_borrower.email,
-        password = test_borrower.password,
-        type = test_borrower.account_type
-    )
-    librarian = user_repo.insert_user(
-        name = test_librarian.name,
-        email = test_librarian.email,
-        password = test_librarian.password,
-        type = test_librarian.account_type
-    )
-    admin = user_repo.insert_user(
-        name = test_admin.name,
-        email = test_admin.email,
-        password = test_admin.password,
-        type = test_admin.account_type
-    )
+        # Insert test users
+        g.borrower = user_repo.insert_user(
+            name = test_borrower.name,
+            email = test_borrower.email,
+            password = test_borrower.password,
+            type = test_borrower.account_type
+        )
+        g.librarian = user_repo.insert_user(
+            name = test_librarian.name,
+            email = test_librarian.email,
+            password = test_librarian.password,
+            type = test_librarian.account_type
+        )
+        g.admin = user_repo.insert_user(
+            name = test_admin.name,
+            email = test_admin.email,
+            password = test_admin.password,
+            type = test_admin.account_type
+        )
 
-    yield app
+        yield app
 
-    # Clean up test users
-    user_repo.delete_user(borrower)
-    user_repo.delete_user(librarian)
-    user_repo.delete_user(admin)
+        # Clean up test users
+        user_repo.delete_user(g.borrower)
+        user_repo.delete_user(g.librarian)
+        user_repo.delete_user(g.admin)
 
 
 @pytest.fixture
