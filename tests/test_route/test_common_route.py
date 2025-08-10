@@ -22,7 +22,7 @@ def test_log_in(client, email, password, type, message, code):
     )
 
     if "message" in response.json:
-        assert response.json["message"]
+        assert response.json["message"] == message
     else:
-        assert response.json["error"]
+        assert response.json["error"] == message
     assert response.status_code == code
