@@ -3,7 +3,7 @@ import decimal
 
 from ..tables import Fine
 from .base_repository import BaseRepository
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 class FineRepository(BaseRepository):
@@ -50,3 +50,6 @@ class FineRepository(BaseRepository):
         self.session.add(fine)
         
         return fine
+    
+    def truncate_table(self) -> None:
+        self.session.execute(text("TRUNCATE TABLE fine CASCADE"))

@@ -1,6 +1,6 @@
 from ..tables import Book, BookCondition
 from .base_repository import BaseRepository
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 class BookRepository(BaseRepository):
@@ -43,3 +43,6 @@ class BookRepository(BaseRepository):
 
     def delete_book(self, book: Book) -> None:
         self.session.delete(book)  
+
+    def truncate_table(self) -> None:
+        self.session.execute(text("TRUNCATE TABLE book CASCADE"))

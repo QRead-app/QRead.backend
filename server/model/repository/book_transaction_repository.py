@@ -1,7 +1,7 @@
 from datetime import datetime
 from ..tables import BookTransaction
 from .base_repository import BaseRepository
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 class BookTransactionRepository(BaseRepository):
@@ -48,3 +48,6 @@ class BookTransactionRepository(BaseRepository):
         self.session.add(transaction)
 
         return transaction
+    
+    def truncate_table(self) -> None:
+        self.session.execute(text("TRUNCATE TABLE book_transaction CASCADE"))

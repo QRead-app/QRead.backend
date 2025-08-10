@@ -1,6 +1,6 @@
 from ..tables import User, AccountType
 from .base_repository import BaseRepository
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 class UserAccountRepository(BaseRepository):
@@ -42,4 +42,7 @@ class UserAccountRepository(BaseRepository):
         return user
 
     def delete_user(self, user: User) -> None:
-        self.session.delete(user)    
+        self.session.delete(user)   
+
+    def truncate_table(self) -> None:
+        self.session.execute(text("TRUNCATE TABLE user_account CASCADE"))
