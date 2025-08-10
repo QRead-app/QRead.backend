@@ -1,5 +1,5 @@
 from flask import Blueprint, g, jsonify, request, session
-from server.exceptions import BookAlreadyBorrowedError, BookBorrowingError, DatabaseError, EmailAlreadyExistsError
+from server.exceptions import BookBorrowingError, DatabaseError, EmailAlreadyExistsError
 from server.model.tables import AccountType, Book, Fine, User
 from server.model.service.borrower.borrower_service import BorrowerService
 from server.route.requires_auth_wrapper import requires_auth
