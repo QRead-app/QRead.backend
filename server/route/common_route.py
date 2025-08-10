@@ -35,5 +35,5 @@ def logout():
         session.pop("session")
         return jsonify({"message": "Logout successful"}), 200
     
-    return jsonify({"message": "No active session"}), 204
+    return jsonify({"message": "No active session"}), 200
 
