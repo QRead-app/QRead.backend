@@ -31,7 +31,4 @@ def create_app():
     def load_session():
         g.Session = Session
 
-    print(app.url_map)
-
-
     return app
