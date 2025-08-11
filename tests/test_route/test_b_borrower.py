@@ -92,3 +92,31 @@ def test_borrow_bad_borrowed(borrower_client):
 
     assert response.json.get("error") == f"Book {current_app.config['test_book']['id']} has already been borrowed"
     assert response.status_code == 400
+
+"""
+    Borrower - /get-borrowed-books
+"""
+
+def test_get_borrowed_bad_unauthorized(client):
+    response = client.get(
+        "/borrower/get-borrowed-books"
+    )
+
+    assert response.json.get("error") == "Unauthorized"
+    assert response.status_code == 401
+
+def test_get_borrowed_bad_no_borrowed(borrower_2_client):
+    response = borrower_2_client.get(
+        "/borrower/get-borrowed-books"
+    )
+
+    assert response.status_code == 204
+
+def test_get_borrowed_good(borrower_client):
+    response = borrower_client.get(
+        "/borrower/get-borrowed-books"
+    )
+    
+    assert response.json.get("message") == "Borrowed book(s) retrieved"
+    assert response.status_code == 200
+    assert response.json.get("data")[0]["id"]== current_app.config["test_book"]["id"]
