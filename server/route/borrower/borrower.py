@@ -32,8 +32,8 @@ def register():
 
     return jsonify({"message": "Registered"}), 200
 
-@requires_auth(AccountType.BORROWER)
 @borrower.route("/borrow", methods=["POST"])
+@requires_auth(AccountType.BORROWER)
 def borrow():
     data = request.json
     book_ids = data.get("books")
@@ -51,8 +51,8 @@ def borrow():
     
     return jsonify({"message": "Book(s) borrowed successfully"}), 200
 
-@requires_auth(AccountType.BORROWER)
 @borrower.route("/get-borrowed-books", methods=["GET"])
+@requires_auth(AccountType.BORROWER)
 def get_borrowed_books():
     borrowed_books: list[Book] = []
     try:
@@ -73,8 +73,8 @@ def get_borrowed_books():
         "data": borrowed_books_dict
     }), 200
 
-@requires_auth(AccountType.BORROWER)
 @borrower.route("/get-fines", methods=["GET"])
+@requires_auth(AccountType.BORROWER)
 def get_fines():
     fines: list[Fine] = []
     books: list[Book] = []
@@ -101,8 +101,8 @@ def get_fines():
         "data": fine_dict
     }), 200
 
-@requires_auth(AccountType.BORROWER)
 @borrower.route("/pay-fine", methods=["POST"])
+@requires_auth(AccountType.BORROWER)
 def pay_fine():
     data = request.json
     fine_id = data.get("fine_id")
