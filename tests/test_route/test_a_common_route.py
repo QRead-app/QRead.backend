@@ -1,5 +1,6 @@
 import pytest
 
+from flask import current_app, g
 from tests.test_data import test_admin, test_borrower, test_librarian
 
 
@@ -47,3 +48,32 @@ def test_log_out_with_session(client):
 
     assert response.json.get("message") == "Logout successful"
     assert response.status_code == 200
+
+def test_get_book_bad(client):
+    response = client.get(
+        "/get-book",
+        json = {
+            "book": {
+                "title": "random wrong title"
+            }
+        }
+    )
+
+    assert response.json.get("error") == "Book not found"
+    assert response.status_code == 404
+
+def test_get_book_good(client):
+    response = client.get(
+        "/get-book",
+        json = {
+            "book": {
+                "title": "test_title"
+            }
+        }
+    )
+
+    assert response.json.get("message") == "Book retrieved"
+    assert response.json.get("data").get("title") == "test_title"
+    assert response.status_code == 200
+
+    current_app.config["test_book"] = response.json.get("data")
