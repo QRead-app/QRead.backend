@@ -24,7 +24,6 @@ def login(type: str):
         
     common_service = CommonService(g.Session)
 
-    user: User
     try:
         user = common_service.authenticate(email, password, account_type)
     except IncorrectCredentialsError as e:
@@ -43,3 +42,23 @@ def logout():
     
     return jsonify({"message": "No active session"}), 200
 
+@common.route("/get-book", methods=["GET"])
+def get_book():
+    data = request.json
+    book = data.get("book")
+
+    try:
+        result = CommonService(g.Session).get_book(
+            book.get("id", None),
+            book.get("title", None),
+            book.get("description", None),
+            book.get("author", None),
+            book.get("condition", None),
+        )
+    except DatabaseError as e:
+        return jsonify({"error": str(e)}), 500
+    
+    if len(result) == 0:
+        return jsonify({"error": "Book not found"}), 404
+    
+    return result
