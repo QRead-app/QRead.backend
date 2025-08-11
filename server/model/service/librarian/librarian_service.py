@@ -1,22 +1,17 @@
+from decimal import Decimal
+from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountType, User
-from server.model.repository.user_account_repository import UserAccountRepository
-from server.exceptions import EmailAlreadyExistsError
+from server.model.tables import Fine
 
 class LibrarianService(BaseService):
     def __init__(self, Session):
         super().__init__(Session)
 
     @transactional
-    def register(self, email: str, password: str) -> User:
-        user_repo = UserAccountRepository(self.session)
+    def issue_fine(self, user_id: int, transaction_id: int, amount: Decimal, reason: str) -> Fine:
+        fine_repo = FineRepository(self.session)
 
-        result = user_repo.get_user(email = email, 
-                                    password = password, 
-                                    account_type = AccountType.ADMIN)
-        if len(result) > 0:
-            raise EmailAlreadyExistsError("The email provided is already registered")
-        
-        
-        return True
+        fine = fine_repo.insert_fine(user_id, transaction_id, amount, reason)
+
+        return fine
