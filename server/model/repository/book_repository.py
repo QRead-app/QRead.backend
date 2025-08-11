@@ -34,6 +34,22 @@ class BookRepository(BaseRepository):
 
         return self.session.execute(stmt).scalars().all()
 
+    def search_books(
+        self, 
+        search: str
+    ) -> list[Book]:
+        stmt = select(Book)
+
+        filters = []
+        filters.append(Book.title.like(f"%{search}%"))
+        filters.append(Book.description.like(f"%{search}%"))
+        filters.append(Book.author.like(f"%{search}%"))
+
+        if filters: 
+            stmt = stmt.where(*filters)
+
+        return self.session.execute(stmt).scalars().all()
+
 
     def insert_book(self, title: str, description: str, author: str, condition: BookCondition) -> Book:
         book = Book(title = title, description = description, author = author, condition = condition)
