@@ -81,6 +81,13 @@ class User(Base):
         return re.search("^.+@.+[.].+$", email) != None
 
     @staticmethod
+    def str_to_account_type(str: str) -> AccountType:
+        try:
+            AccountType[str.upper()]
+        except KeyError:
+            raise ConversionError(f"Error converting {str} to AccountType ENUM")
+        
+    @staticmethod
     def str_to_account_state(str: str) -> AccountState:
         try:
             AccountState[str.upper()]
