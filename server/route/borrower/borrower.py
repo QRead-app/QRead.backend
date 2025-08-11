@@ -55,6 +55,7 @@ def borrow():
 @requires_auth(AccountType.BORROWER)
 def get_borrowed_books():
     borrowed_books: list[Book] = []
+
     try:
         borrowed_books = BorrowerService(g.Session).get_borrowed_books(
             session["session"]["id"])
@@ -65,8 +66,9 @@ def get_borrowed_books():
         return jsonify({"message": "No books found"}), 204
     
     borrowed_books_dict = []
+
     for book in borrowed_books:
-        borrowed_books_dict.append(book.to_dict)
+        borrowed_books_dict.append(book.to_dict())
 
     return jsonify({
         "message": "Borrowed book(s) retrieved",

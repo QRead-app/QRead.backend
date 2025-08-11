@@ -28,7 +28,7 @@ class BorrowerService(BaseService):
         return user
 
     @transactional
-    def borrow_book(self, id: str, book_ids: list[int]) -> list[Book]:
+    def borrow_book(self, user_id: str, book_ids: list[int]) -> list[Book]:
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)
         books_borrowed: list[Book] = []
@@ -44,7 +44,6 @@ class BorrowerService(BaseService):
 
             # Check if book is borrowed
             result = transaction_repo.get_transactions(
-                user_id = id, 
                 book_id = book_id,
                 returned = False
             )
@@ -54,30 +53,30 @@ class BorrowerService(BaseService):
                     f"Book {book_id} has already been borrowed")
             
             book = transaction_repo.insert_transaction(
-                user_id = id,
+                user_id = user_id,
                 book_id = book_id,
                 due_date = datetime.now() + timedelta(days=14)
             )
             books_borrowed.append(book)
-            
+
         return books_borrowed
     
     @transactional
-    def get_borrowed_books(self, id: str) -> list[Book]:
+    def get_borrowed_books(self, user_id: str) -> list[Book]:
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)
 
         borrowed_book_transactions = transaction_repo.get_transactions(
-            user_id = id, returned = False
+            user_id = user_id, returned = False
         )
 
         if len(borrowed_book_transactions) == 0:
             return []
 
         borrowed_books: list[Book] = []
-        for book in borrowed_books:
-            book_obj = book_repo.get_book(id = book.id)
-            borrowed_books.append(book_obj)
+        for book in borrowed_book_transactions:
+            book_obj = book_repo.get_book(id = book.book_id)
+            borrowed_books.append(book_obj[0])
 
         return borrowed_books
     
