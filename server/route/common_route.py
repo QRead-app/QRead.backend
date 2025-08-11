@@ -61,4 +61,7 @@ def get_book():
     if len(result) == 0:
         return jsonify({"error": "Book not found"}), 404
     
-    return result
+    return jsonify({
+        "message": "Book retrieved",
+        "data": result[0].to_dict()
+    }), 200

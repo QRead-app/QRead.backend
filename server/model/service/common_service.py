@@ -2,7 +2,7 @@ from server.exceptions import DatabaseError, IncorrectCredentialsError
 from server.model.repository.book_repository import BookRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountType, Book, User
+from server.model.tables import AccountType, User
 from server.model.repository.user_account_repository import UserAccountRepository
 
 class CommonService(BaseService):
