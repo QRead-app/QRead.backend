@@ -40,7 +40,7 @@ class BorrowerService(BaseService):
                 returned = False
             )
 
-            if result is not None:
+            if len(result) != 0:
                 raise BookBorrowingError(
                     f"{book_id} has already been borrowed or does not exist")
             
@@ -62,7 +62,7 @@ class BorrowerService(BaseService):
             user_id = id, returned = False
         )
 
-        if borrowed_book_transactions is None:
+        if len(borrowed_book_transactions) == 0:
             return []
 
         borrowed_books: list[Book] = []
@@ -82,7 +82,7 @@ class BorrowerService(BaseService):
             user_id = id, paid = False
         )
 
-        if fines is None:
+        if len(fines) == 0:
             return []
         
         transactions: list[BookTransaction] = []
@@ -108,7 +108,7 @@ class BorrowerService(BaseService):
             id = id, paid = False
         )
 
-        if fine is None:
+        if len(fine) == 0:
             raise RecordNotFoundError(f"Fine {id} not found")
         
         if len(fine) > 1:

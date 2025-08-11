@@ -14,7 +14,7 @@ class BookRepository(BaseRepository):
         description: str | None = None, 
         author: str | None = None, 
         condition: BookCondition | None = None, 
-    ) -> list[Book] | None:
+    ) -> list[Book]:
         stmt = select(Book)
 
         filters = []

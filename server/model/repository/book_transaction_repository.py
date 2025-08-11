@@ -16,7 +16,7 @@ class BookTransactionRepository(BaseRepository):
         date: datetime | None = None, 
         due: datetime | None = None, 
         returned: bool | None = None
-    ) -> list[BookTransaction] | None:
+    ) -> list[BookTransaction]:
         stmt = select(BookTransaction)
 
         filters = []

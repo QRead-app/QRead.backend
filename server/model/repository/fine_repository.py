@@ -19,7 +19,7 @@ class FineRepository(BaseRepository):
         reason: str | None = None,
         date: datetime | None = None, 
         paid: bool | None = None
-    ) -> list[Fine] | None:
+    ) -> list[Fine]:
         stmt = select(Fine)
 
         filters = []

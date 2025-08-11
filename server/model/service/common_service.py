@@ -24,10 +24,10 @@ class CommonService(BaseService):
         return user[0]
 
     @transactional
-    def verify(self, email: str, account_type: AccountType) -> bool:
+    def verify(self, id: str, account_type: AccountType) -> bool:
         user_repo = UserAccountRepository(self.session)
 
-        result = user_repo.get_user(email = email, 
+        result = user_repo.get_user(id = id, 
                                     account_type = account_type)
         
         if len(result) == 0:

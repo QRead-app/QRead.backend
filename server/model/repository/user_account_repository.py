@@ -14,7 +14,7 @@ class UserAccountRepository(BaseRepository):
         email: str | None = None, 
         password: str | None = None, 
         account_type: AccountType | None = None,
-    ) -> list[User] | None:
+    ) -> list[User]:
         stmt = select(User)
 
         filters = []
