@@ -30,14 +30,14 @@ class Base(DeclarativeBase):
         return {col.name: getattr(self, col.name) for col in self.__table__.columns}
     
     @staticmethod
-    def str_to_int(str: str):
+    def str_to_int(str: str) -> int:
         try:
             int(str)
         except ValueError:
             raise ConversionError(f"Error converting {str} to int")
         
     @staticmethod
-    def str_to_decimal(str: str):
+    def str_to_decimal(str: str) -> Decimal:
         try:
             Decimal(str)
         except ValueError:
