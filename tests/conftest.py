@@ -32,6 +32,19 @@ def borrower_client(app):
     return client
 
 @pytest.fixture
+def borrower_2_client(app):
+    client = app.test_client()
+    client.post(
+        "/borrower/login",
+        json = {
+            "email": test_borrower_2.email,
+            "password": test_borrower_2.password
+        }
+    )
+    
+    return client
+
+@pytest.fixture
 def admin_client(app):
     client = app.test_client()
     client.post(
@@ -79,6 +92,12 @@ def app_configuration(app, runner):
                 email = test_borrower.email,
                 password = test_borrower.password,
                 type = test_borrower.account_type
+            )
+            user_repo.insert_user(
+                name = test_borrower_2.name,
+                email = test_borrower_2.email,
+                password = test_borrower_2.password,
+                type = test_borrower_2.account_type
             )
             user_repo.insert_user(
                 name = test_librarian.name,

@@ -7,6 +7,13 @@ test_borrower = User(
     account_type = AccountType.BORROWER,
 )
 
+test_borrower_2 = User(
+    name = "test_borrower_2",
+    email = "test_borrower_2@email.com",
+    password = "test_borrower_2",
+    account_type = AccountType.BORROWER,
+)
+
 test_librarian = User(
     name = "test_librarian",
     email = "test_librarian@email.com",
