@@ -63,7 +63,7 @@ class BorrowerService(BaseService):
         return books_borrowed
     
     @transactional
-    def get_borrowed_book(self, id: str) -> list[Book]:
+    def get_borrowed_books(self, id: str) -> list[Book]:
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)
 
