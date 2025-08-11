@@ -15,3 +15,6 @@ class IncorrectCredentialsError(ServiceError):
 
 class DatabaseError(ServiceError):
     pass
+
+class ConversionError(ServiceError):
+    pass
