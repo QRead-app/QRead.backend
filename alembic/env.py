@@ -59,6 +59,10 @@ def run_migrations_online() -> None:
 
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py', silent=False)
+    
+    if app.config["ENVIRONMENT"] == 'testing':
+        app.config.from_object('server.config.TestingConfig')
+        app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
 
     connectable = create_engine(app.config["CONNECTION_STRING"])
 

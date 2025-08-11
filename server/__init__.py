@@ -15,6 +15,7 @@ def create_app():
         app.config.from_object('server.config.ProductionConfig')
     if app.config["ENVIRONMENT"] == 'testing':
         app.config.from_object('server.config.TestingConfig')
+        app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
 
     from .model.seed import seed_db
     seed_db.init_app(app)
