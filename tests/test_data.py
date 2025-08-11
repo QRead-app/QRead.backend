@@ -1,4 +1,4 @@
-from server.model.tables import AccountType, User
+from server.model.tables import AccountType, Book, BookCondition, User
 
 test_borrower = User(
     name = "test_borrower",
@@ -19,4 +19,11 @@ test_admin = User(
     email = "test_admin@email.com",
     password = "test_admin",
     account_type = AccountType.ADMIN,
+)
+
+test_book = Book(
+    title = "test_title",
+    description = "test_description",
+    author = "test_author",
+    condition = BookCondition.FAIR
 )

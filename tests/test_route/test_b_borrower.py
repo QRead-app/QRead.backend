@@ -1,7 +1,6 @@
 import pytest
 
-from tests.test_users import test_admin, test_borrower, test_librarian
-
+from tests.test_data import test_admin, test_borrower, test_librarian
 
 @pytest.mark.parametrize(('name', 'email', 'password', 'message', "code"), (
     (None, None, None, "Missing fields", 400),
@@ -13,7 +12,7 @@ from tests.test_users import test_admin, test_borrower, test_librarian
 ))
 def test_register_bad(client, name, email, password, message, code):
     response = client.post(
-        f"/borrower/register",
+        "/borrower/register",
         json={
             "name": name,
             "email": email,
@@ -37,3 +36,32 @@ def test_register_good(client):
     assert response.json.get("message") == "Registered"
     assert response.status_code == 200
 
+def test_borrow_bad_unauthorized(client):
+    response = client.post(
+        "/borrower/borrow",
+        json = {
+            "books": [  ]
+        }
+    )
+
+@pytest.mark.parametrize(('books', 'message', "code"), (
+    (None, "Missing fields", 400),
+    ({"books": [99999]}, "99999 has already been borrowed or does not exist", 400),
+    ({"books": [88888, 99999]}, "88888 has already been borrowed or does not exist", 400)
+))
+def test_borrow_bad(client, books, message, code):
+    response = client.post(
+        "/borrower/borrow",
+        json = books
+    )
+
+    assert response.json.get("error") == message
+    assert response.status_code == code
+
+def test_borrow_good(client):
+    response = client.post(
+        "borrower/borrow",
+        json = {
+            "books": []
+        }
+    )

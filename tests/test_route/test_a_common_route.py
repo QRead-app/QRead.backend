@@ -1,6 +1,6 @@
 import pytest
 
-from tests.test_users import test_admin, test_borrower, test_librarian
+from tests.test_data import test_admin, test_borrower, test_librarian
 
 
 @pytest.mark.parametrize(('email', 'password', 'type', 'message', "code"), (

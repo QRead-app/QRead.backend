@@ -6,8 +6,7 @@ from server.model.repository.book_repository import BookRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
 from server.model.repository.fine_repository import FineRepository
 from server.model.tables import AccountType
-from server.model.seed.seed_db import seed_db_command
-from tests.test_users import test_borrower, test_librarian, test_admin
+from tests.test_data import *
 from server import create_app
 from server.model.repository.user_account_repository import UserAccountRepository
 
@@ -51,6 +50,7 @@ def app_configuration(app, runner):
 
         with Session.begin() as session:
             user_repo = UserAccountRepository(session)
+            book_repo = BookRepository(session)
 
             # Insert test users
             user_repo.insert_user(
@@ -70,6 +70,13 @@ def app_configuration(app, runner):
                 email = test_admin.email,
                 password = test_admin.password,
                 type = test_admin.account_type
+            )
+
+            book_repo.insert_book(
+                title = test_book.title,
+                description = test_book.description,
+                author = test_book.author,
+                condition = test_book.condition
             )
 
         yield app
