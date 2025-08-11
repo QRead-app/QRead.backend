@@ -99,6 +99,13 @@ class Book(Base):
         dict["condition"] = self.condition.name
 
         return dict
+    
+    @staticmethod
+    def str_to_book_condition(str: str) -> BookCondition:
+        try:
+            BookCondition[str.upper()]
+        except KeyError:
+            raise ConversionError(f"Error converting {str} to BookCondition ENUM")
 
 class Fine(Base):
     __tablename__ = "fine"
