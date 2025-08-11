@@ -18,23 +18,44 @@ def app():
 def client(app):
     return app.test_client()
 
-class AuthActions(object):
-    def __init__(self, client):
-        self._client = client
-
-    def login(self, email: str, password: str, type: AccountType):
-        return self._client.post(
-            f'/{type.name.lower()}/login',
-            json={'email': email, 'password': password}
-        )
-
-    def logout(self):
-        return self._client.get('/logout')
-
+@pytest.fixture
+def borrower_client(app):
+    client = app.test_client()
+    client.post(
+        "/borrower/login",
+        json = {
+            "email": test_borrower.email,
+            "password": test_borrower.password
+        }
+    )
+    
+    return client
 
 @pytest.fixture
-def auth(client):
-    return AuthActions(client)
+def admin_client(app):
+    client = app.test_client()
+    client.post(
+        "/admin/login",
+        json = {
+            "email": test_admin.email,
+            "password": test_admin.password
+        }
+    )
+
+    return client
+
+@pytest.fixture
+def librarian_client(app):
+    client = app.test_client()
+    client.post(
+        "/librarian/login",
+        json = {
+            "email": test_librarian.email,
+            "password": test_librarian.password
+        }
+    )
+
+    return client
 
 @pytest.fixture(scope="session")
 def runner(app):
