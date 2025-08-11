@@ -30,9 +30,18 @@ class BorrowerService(BaseService):
     @transactional
     def borrow_book(self, id: str, book_ids: list[int]) -> list[Book]:
         transaction_repo = BookTransactionRepository(self.session)
+        book_repo = BookRepository(self.session)
         books_borrowed: list[Book] = []
-
+        
         for book_id in book_ids:
+
+            # Check if book exist
+            book_check = book_repo.get_book(id=book_id)
+
+            if len(book_check) == 0:
+                raise BookBorrowingError(
+                    f"Book {book_id} does not exist")
+
             # Check if book is borrowed
             result = transaction_repo.get_transactions(
                 user_id = id, 
@@ -42,7 +51,7 @@ class BorrowerService(BaseService):
 
             if len(result) != 0:
                 raise BookBorrowingError(
-                    f"{book_id} has already been borrowed or does not exist")
+                    f"Book {book_id} has already been borrowed")
             
             book = transaction_repo.insert_transaction(
                 user_id = id,
@@ -50,7 +59,7 @@ class BorrowerService(BaseService):
                 due_date = datetime.now() + timedelta(days=14)
             )
             books_borrowed.append(book)
-
+            
         return books_borrowed
     
     @transactional
