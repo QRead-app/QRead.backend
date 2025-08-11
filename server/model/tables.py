@@ -1,3 +1,4 @@
+from decimal import Decimal
 import enum
 import re
 
@@ -6,6 +7,8 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.types import TIMESTAMP, NUMERIC
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from server.exceptions import ConversionError
 
 class AccountType(enum.Enum):
     ADMIN = 1
@@ -25,6 +28,20 @@ class BookCondition(enum.Enum):
 class Base(DeclarativeBase):
     def to_dict(self):
         return {col.name: getattr(self, col.name) for col in self.__table__.columns}
+    
+    @staticmethod
+    def str_to_int(str: str):
+        try:
+            int(str)
+        except ValueError:
+            raise ConversionError(f"Error converting {str} to int")
+        
+    @staticmethod
+    def str_to_decimal(str: str):
+        try:
+            Decimal(str)
+        except ValueError:
+            raise ConversionError(f"Error converting {str} to Decimal")
 
 class User(Base):
     __tablename__ = "user_account"
