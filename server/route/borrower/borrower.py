@@ -37,10 +37,10 @@ def register():
 def borrow():
     data = request.json
     book_ids = data.get("books")
-
+    
     if book_ids is None:
         return jsonify({"error": "Missing field"}), 400
-
+    
     try:
         BorrowerService(g.Session).borrow_book(
             session["session"]["id"], book_ids)
