@@ -25,6 +25,10 @@ class BookCondition(enum.Enum):
     DAMAGED = 7
     UNUSABLE = 8
 
+class AccountState(enum.Enum):
+    ACTIVE = 1,
+    SUSPENDED = 2
+
 class Base(DeclarativeBase):
     def to_dict(self):
         return {col.name: getattr(self, col.name) for col in self.__table__.columns}
@@ -51,6 +55,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     account_type: Mapped[AccountType]
+    account_state: Mapped[AccountState]
 
     fines: Mapped[List["Fine"]] = relationship(back_populates="user")
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="user")
@@ -61,7 +66,8 @@ class User(Base):
             name: {self.name}, 
             email: {self.email}, 
             password: {self.password}, 
-            account_type: {self.account_type}
+            account_type: {self.account_type},
+            account_state: {self.account_state}
         """
     
     def to_dict(self):
@@ -73,6 +79,13 @@ class User(Base):
     @staticmethod
     def is_email(email: str) -> bool:
         return re.search("^.+@.+[.].+$", email) != None
+
+    @staticmethod
+    def str_to_account_state(str: str) -> AccountState:
+        try:
+            AccountState[str.upper()]
+        except KeyError:
+            raise ConversionError(f"Error converting {str} to AccountState ENUM")
 
 class Book(Base):
     __tablename__ = "book"
