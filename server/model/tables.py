@@ -47,6 +47,12 @@ class User(Base):
             account_type: {self.account_type}
         """
     
+    def to_dict(self):
+        dict = super().to_dict()
+        dict["account_type"] = self.account_type.name
+
+        return dict
+    
     @staticmethod
     def is_email(email: str) -> bool:
         return re.search("^.+@.+[.].+$", email) != None
@@ -70,6 +76,12 @@ class Book(Base):
             author: {self.author}, 
             condition: {self.condition}
         """
+    
+    def to_dict(self):
+        dict = super().to_dict()
+        dict["condition"] = self.condition.name
+
+        return dict
 
 class Fine(Base):
     __tablename__ = "fine"
