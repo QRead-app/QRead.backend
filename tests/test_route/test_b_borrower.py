@@ -3,6 +3,11 @@ import pytest
 from flask import current_app, g
 from tests.test_data import *
 
+
+"""
+    Borrower - /register
+"""
+
 @pytest.mark.parametrize(('name', 'email', 'password', 'message', "code"), (
     (None, None, None, "Missing fields", 400),
     (None, 'testtest@test.com', "admin", 'Missing fields', 400),
@@ -36,6 +41,10 @@ def test_register_good(client):
 
     assert response.json.get("message") == "Registered"
     assert response.status_code == 200
+
+"""
+    Borrower - /borrow
+"""
 
 def test_borrow_bad_unauthorized(client):
     response = client.post(
@@ -83,4 +92,3 @@ def test_borrow_bad_borrowed(borrower_client):
 
     assert response.json.get("error") == f"Book {current_app.config['test_book']['id']} has already been borrowed"
     assert response.status_code == 400
-
