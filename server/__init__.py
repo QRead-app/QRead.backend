@@ -1,4 +1,5 @@
-from flask import Flask, g
+from flask import Flask, app, g, jsonify
+from server.exceptions import DatabaseError
 from server.model.db import DB
 from server.route.admin.admin import admin
 from server.route.borrower.borrower import borrower
@@ -32,4 +33,13 @@ def create_app():
     def load_session():
         g.Session = Session
 
+    app.register_error_handler(
+        DatabaseError,
+        handle_database_error
+    )
+
     return app
+
+@app.errorhandler(DatabaseError)
+def handle_database_error(e):
+    return jsonify({"error": "Internal server error"}), 500
