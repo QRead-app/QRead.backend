@@ -59,7 +59,9 @@ def seed_db_command():
                 names[n], 
                 emails[n], 
                 names[n].replace(" ", ""), 
-                AccountType(type).name)
+                AccountType(type).name,
+                AccountState.ACTIVE
+            )
 
         # Seed books
         print("Seeding books...")
