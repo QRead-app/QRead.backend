@@ -6,11 +6,10 @@ from tests.test_data import test_admin, test_borrower, test_librarian
 
 @pytest.mark.parametrize(('email', 'password', 'type', 'message', "code"), (
     ('', '', "admi", "Invalid path admi", 404),
-    ('', 'a', "admin", 'Authentication failed', 401),
-    ('a', '', "borrower", 'Authentication failed', 401),
-    ('', '', "librarian", 'Authentication failed', 401),
+    (None, "a", "librarian", 'Missing email field', 400),
+    ("a", None, "librarian", 'Missing password field', 400),
+    ("emial.com", test_librarian.password, "librarian", 'Invalid email emial.com', 400),
     (test_borrower.email, '', "borrower", 'Authentication failed', 401),
-    ('', test_librarian.password, "librarian", 'Authentication failed', 401),
     (test_librarian.email, test_librarian.password, "librarian", 'Login successful', 200),
 ))
 def test_log_in(client, email, password, type, message, code):
@@ -49,31 +48,37 @@ def test_log_out_with_session(client):
     assert response.json.get("message") == "Logout successful"
     assert response.status_code == 200
 
-def test_get_book_bad(client):
+@pytest.mark.parametrize(("id", "title", "condition", "message", "code"), (
+    ("12", "random wrong title", "FAIR", "No book found", 200),
+    ("HI", "random wrong title", "FAIR", "Invalid book id HI", 400),
+    ("12", "random wrong title", "PRISTINE", "Invalid book condition PRISTINE", 400),
+))
+def test_get_book_bad(client, id, title, condition, message, code):
     response = client.get(
         "/get-book",
         json = {
-            "book": {
-                "title": "random wrong title"
-            }
+            "id": id,
+            "title": title,
+            "condition": condition
         }
     )
 
-    assert response.json.get("error") == "Book not found"
-    assert response.status_code == 404
+    assert ( 
+        response.json.get("message") == message
+        or response.json.get("error") == message
+    )
+    assert response.status_code == code
 
 def test_get_book_good(client):
     response = client.get(
         "/get-book",
         json = {
-            "book": {
-                "title": "test_title"
-            }
+            "title": "test_title"
         }
     )
 
-    assert response.json.get("message") == "Book retrieved"
-    assert response.json.get("data").get("title") == "test_title"
+    assert response.json.get("message") == "Book(s) retrieved"
+    assert response.json.get("data")[0].get("title") == "test_title"
     assert response.status_code == 200
 
-    current_app.config["test_book"] = response.json.get("data")
+    current_app.config["test_book"] = response.json.get("data")[0]

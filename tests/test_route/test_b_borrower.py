@@ -9,12 +9,11 @@ from tests.test_data import *
 """
 
 @pytest.mark.parametrize(('name', 'email', 'password', 'message', "code"), (
-    (None, None, None, "Missing fields", 400),
-    (None, 'testtest@test.com', "admin", 'Missing fields', 400),
-    ('test123', None, "test123", 'Missing fields', 400),
-    (None, None, "test123", 'Missing fields', 400),
-    (test_borrower.name, test_borrower.email, "borrower", 'The email provided is already registered', 400),
-    ("Emailemail.com", "Emailemail.com", "librarian", 'Invalid Email', 400)
+    (None, 'testtest@test.com', "Admin", "Missing name field", 400),
+    ("NAME", None, "admin", 'Missing email field', 400),
+    ('test123', "test@test.com", None, 'Missing password field', 400),
+    ("NAME", "test.com", "test123", 'Invalid email test.com', 400),
+    (test_borrower.name, test_borrower.email, "borrower", f'Email {test_borrower.email} is already registered', 400),
 ))
 def test_register_bad(client, name, email, password, message, code):
     response = client.post(
@@ -50,7 +49,7 @@ def test_borrow_bad_unauthorized(client):
     response = client.post(
         "/borrower/borrow",
         json = {
-            "books": ["123"]
+            "book_ids": ["123"]
         }
     )
 
@@ -58,9 +57,9 @@ def test_borrow_bad_unauthorized(client):
     assert response.status_code == 401
 
 @pytest.mark.parametrize(('books', 'message', "code"), (
-    ({}, "Missing field", 400),
-    ({"books": ["1"]}, "Book 1 does not exist", 400),
-    ({"books": ["2", "1"]}, "Book 2 does not exist", 400)
+    ({}, "Missing book_ids field", 400),
+    ({"book_ids": ["1"]}, "Book id 1 not found", 400),
+    ({"book_ids": ["2", "1"]}, "Book id 2 not found", 400)
 ))
 def test_borrow_bad(borrower_client, books, message, code):
     response = borrower_client.post(
@@ -75,7 +74,7 @@ def test_borrow_good(borrower_client):
     response = borrower_client.post(
         "/borrower/borrow",
         json = {
-            "books": [current_app.config["test_book"]["id"]]
+            "book_ids": [current_app.config["test_book"]["id"]]
         }
     )
 
@@ -86,11 +85,11 @@ def test_borrow_bad_borrowed(borrower_client):
     response = borrower_client.post(
         "/borrower/borrow",
         json = {
-            "books": [current_app.config["test_book"]["id"]]
+            "book_ids": [current_app.config["test_book"]["id"]]
         }
     )
 
-    assert response.json.get("error") == f"Book {current_app.config['test_book']['id']} has already been borrowed"
+    assert response.json.get("error") == f"Book id {current_app.config['test_book']['id']} has already been borrowed"
     assert response.status_code == 400
 
 """
@@ -110,7 +109,8 @@ def test_get_borrowed_bad_no_borrowed(borrower_2_client):
         "/borrower/get-borrowed-books"
     )
 
-    assert response.status_code == 204
+    assert response.json.get("message") == "No books found"
+    assert response.status_code == 200
 
 def test_get_borrowed_good(borrower_client):
     response = borrower_client.get(
