@@ -10,6 +10,6 @@ def transactional(method):
                 self.session.expire_on_commit = False
                 return method(self, *args, **kwargs)
         except DBAPIError:
-            raise DatabaseError("Database operation failed")
+            raise DatabaseError()
         
     return wrapper

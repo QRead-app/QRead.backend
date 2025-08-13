@@ -28,7 +28,7 @@ class BorrowerService(BaseService):
         return user
 
     @transactional
-    def borrow_book(self, user_id: str, book_ids: list[int]) -> list[Book]:
+    def borrow_book(self, user_id: int, book_ids: list[int]) -> list[Book]:
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)
         books_borrowed: list[Book] = []
@@ -39,8 +39,7 @@ class BorrowerService(BaseService):
             book_check = book_repo.get_book(id=book_id)
 
             if len(book_check) == 0:
-                raise BookBorrowingError(
-                    f"Book {book_id} does not exist")
+                raise RecordNotFoundError(book_id)
 
             # Check if book is borrowed
             result = transaction_repo.get_transactions(
@@ -49,8 +48,7 @@ class BorrowerService(BaseService):
             )
 
             if len(result) != 0:
-                raise BookBorrowingError(
-                    f"Book {book_id} has already been borrowed")
+                raise BookBorrowingError(book_id)
             
             book = transaction_repo.insert_transaction(
                 user_id = user_id,
@@ -62,7 +60,7 @@ class BorrowerService(BaseService):
         return books_borrowed
     
     @transactional
-    def get_borrowed_books(self, user_id: str) -> list[Book]:
+    def get_borrowed_books(self, user_id: int) -> list[Book]:
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)
 
@@ -71,7 +69,7 @@ class BorrowerService(BaseService):
         )
 
         if len(borrowed_book_transactions) == 0:
-            return []
+            raise RecordNotFoundError()
 
         borrowed_books: list[Book] = []
         for book in borrowed_book_transactions:
@@ -81,17 +79,17 @@ class BorrowerService(BaseService):
         return borrowed_books
     
     @transactional
-    def get_fines(self, id: str) -> Tuple[list[Fine], list[Book]]:
+    def get_fines(self, user_id: int) -> Tuple[list[Fine], list[Book]]:
         fine_repo = FineRepository(self.session)
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)
 
         fines = fine_repo.get_fine(
-            user_id = id, paid = False
+            user_id = user_id, paid = False
         )
 
         if len(fines) == 0:
-            return []
+            raise RecordNotFoundError()
         
         transactions: list[BookTransaction] = []
         for fine in fines:
@@ -109,7 +107,7 @@ class BorrowerService(BaseService):
         return fines, books
     
     @transactional
-    def pay_fine(self, id: str) -> list[Book]:
+    def pay_fine(self, id: int) -> list[Book]:
         fine_repo = FineRepository(self.session)
 
         fine = fine_repo.get_fine(

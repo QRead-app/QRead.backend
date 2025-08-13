@@ -1,7 +1,7 @@
 from flask import Blueprint, g, request, session, jsonify
-from server.exceptions import DatabaseError, IncorrectCredentialsError
+from server.exceptions import ConversionError, DatabaseError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.service.common_service import CommonService
-from server.model.tables import AccountType, User
+from server.model.tables import AccountType, Book, User
 
 common = Blueprint('common', __name__)
 
@@ -16,22 +16,21 @@ def login(type: str):
     except KeyError:
         return jsonify({"error": f"Invalid path {type}"}), 404
 
-    if (
-        email is None
-        or password is None
-    ):
-        return jsonify({"error": "Missing fields"}), 400
-        
-    common_service = CommonService(g.Session)
+    if email is None:
+        return jsonify({"error": "Missing email field"}), 400
+    if password is None:
+        return jsonify({"error": "Missing password field"}), 400
+
+    if not User.is_email(email):
+        return jsonify({"error": f"Invalid email {email}"}), 400
 
     try:
-        user = common_service.authenticate(email, password, account_type)
-    except IncorrectCredentialsError as e:
-        return jsonify({"error": str(e)}), 401
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+        user = CommonService(g.Session).authenticate(email, password, account_type)
+    except IncorrectCredentialsError:
+        return jsonify({"error": "Authentication failed"}), 401
 
     session["session"] = {"id": user.id, "account_type": account_type.name}
+
     return jsonify({"message": "Login successful"}), 200
 
 @common.route("/logout", methods=["POST"])
@@ -47,21 +46,38 @@ def get_book():
     data = request.json
     book = data.get("book")
 
+    id = book.get("id")
+    title = book.get("title")
+    description = book.get("description")
+    author = book.get("author")
+    condition = book.get("condition")
+
+    try:
+        id = Book.str_to_int()
+    except ConversionError:
+        return jsonify({"error": f"Invalid book id {id}"}), 400
+    
+    try:
+        condition = Book.str_to_book_condition()
+    except ConversionError:
+        return jsonify({"error": f"Invalid book condition {condition}"}), 400
+
     try:
         result = CommonService(g.Session).get_book(
-            book.get("id", None),
-            book.get("title", None),
-            book.get("description", None),
-            book.get("author", None),
-            book.get("condition", None),
+            id,
+            title,
+            description,
+            author,
+            condition,
         )
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
-    
-    if len(result) == 0:
-        return jsonify({"error": "Book not found"}), 404
-    
+    except RecordNotFoundError:
+        return jsonify({"message": "No book found"}), 200
+
+    books: list[Book] = []
+    for book in result:
+        books.append(book.to_dict())
+
     return jsonify({
-        "message": "Book retrieved",
-        "data": result[0].to_dict()
+        "message": "Book(s) retrieved",
+        "data": books
     }), 200

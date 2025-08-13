@@ -1,5 +1,5 @@
 from flask import Blueprint, g, jsonify, request, session
-from server.exceptions import BookBorrowingError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
+from server.exceptions import BookBorrowingError, ConversionError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.tables import AccountType, Book, Fine, User
 from server.model.service.borrower.borrower_service import BorrowerService
 from server.route.requires_auth_wrapper import requires_auth
@@ -13,22 +13,20 @@ def register():
     email = data.get("email")
     password = data.get("password")
 
-    if (
-        name is None
-        or email is None
-        or password is None
-    ):
-        return jsonify({"error": "Missing fields"}), 400
+    if name is None:
+        return jsonify({"error": "Missing name field"}), 400
+    if email is None:
+        return jsonify({"error": "Missing email field"}), 400
+    if password is None:
+        return jsonify({"error": "Missing password field"}), 400
 
     if not User.is_email(email):
-        return jsonify({"error": "Invalid Email"}), 400
+        return jsonify({"error": f"Invalid email {email}"}), 400
     
     try:
         BorrowerService(g.Session).register(name, email, password)
     except EmailAlreadyExistsError as e:
         return jsonify({"error": str(e)}), 400
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Registered"}), 200
 
@@ -36,18 +34,24 @@ def register():
 @requires_auth(AccountType.BORROWER)
 def borrow():
     data = request.json
-    book_ids = data.get("books")
+    book_ids = data.get("book_ids")
     
     if book_ids is None:
-        return jsonify({"error": "Missing field"}), 400
+        return jsonify({"error": "Missing book_ids field"}), 400
+    
+    for n in range(len(book_ids)):
+        try:
+            book_ids = Book.str_to_int(book_ids[n])
+        except ConversionError:
+            return jsonify({"error": f"Invalid Book id {book_ids[n]}"}), 400
     
     try:
         BorrowerService(g.Session).borrow_book(
             session["session"]["id"], book_ids)
+    except RecordNotFoundError as e:
+        return jsonify({"error": f"Book id {e} not found"}), 400
     except BookBorrowingError as e:
-        return jsonify({"error": str(e)}), 400
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Book id {e} has already been borrowed"}), 400
     
     return jsonify({"message": "Book(s) borrowed successfully"}), 200
 
@@ -59,11 +63,8 @@ def get_borrowed_books():
     try:
         borrowed_books = BorrowerService(g.Session).get_borrowed_books(
             session["session"]["id"])
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
-    
-    if len(borrowed_books) == 0:
-        return jsonify({"message": "No books found"}), 204
+    except RecordNotFoundError:
+        return jsonify({"message": "No books found"}), 200
     
     borrowed_books_dict = []
 
@@ -84,11 +85,8 @@ def get_fines():
     try:
         fines, books = BorrowerService(g.Session).get_fines(
             session["session"]["id"])
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
-    
-    if len(fines) == 0:
-        return jsonify({"message": "No fines found"}), 204
+    except RecordNotFoundError:
+        return jsonify({"message": "No fines found"}), 200
     
     fines_dict = []
     for n in range(len(fines)):
@@ -110,15 +108,16 @@ def pay_fine():
     fine_id = data.get("fine_id")
 
     if fine_id is None:
-        return jsonify({"error": "Missing field"}), 400
+        return jsonify({"error": "Missing fine_id field"}), 400
+    
+    try:
+        fine_id = Fine.str_to_int(fine_id)
+    except ConversionError:
+        return jsonify({"error": f"Invalid fine id {fine_id}"}), 400 
 
     try:
         BorrowerService(g.Session).pay_fine(fine_id)
     except RecordNotFoundError as e:
-        return jsonify({"error": str(e)}), 404
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Fine id {fine_id} not found"}), 404
 
-    return jsonify({
-        "message": "Fine paid successfully",
-    }), 200
+    return jsonify({"message": "Fine paid successfully"}), 200

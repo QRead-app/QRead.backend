@@ -1,8 +1,8 @@
-from server.exceptions import DatabaseError, IncorrectCredentialsError
+from server.exceptions import DatabaseError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.repository.book_repository import BookRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountType, User
+from server.model.tables import AccountType, Book, BookCondition, User
 from server.model.repository.user_account_repository import UserAccountRepository
 
 class CommonService(BaseService):
@@ -36,10 +36,15 @@ class CommonService(BaseService):
         return True
     
     @transactional
-    def get_book(self, id=None, title=None, description=None, author=None, condition=None):
-        book_repo = BookRepository(self.session)
-
-        result = book_repo.get_book(
+    def get_book(
+        self, 
+        id: int | None = None, 
+        title: str | None = None, 
+        description: str | None = None, 
+        author: str | None = None, 
+        condition: BookCondition | None = None
+    ) -> list[Book]:
+        books = BookRepository(self.session).get_book(
             id,
             title,
             description,
@@ -47,4 +52,7 @@ class CommonService(BaseService):
             condition
         )
 
-        return result
+        if len(books) == 0:
+            raise RecordNotFoundError()
+
+        return books
