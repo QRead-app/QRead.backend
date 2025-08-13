@@ -1,4 +1,4 @@
-from ..tables import User, AccountType
+from ..tables import AccountState, User, AccountType
 from .base_repository import BaseRepository
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
@@ -14,6 +14,7 @@ class UserAccountRepository(BaseRepository):
         email: str | None = None, 
         password: str | None = None, 
         account_type: AccountType | None = None,
+        account_state: AccountState | None = None
     ) -> list[User]:
         stmt = select(User)
 
@@ -28,6 +29,8 @@ class UserAccountRepository(BaseRepository):
             filters.append(User.password == password)
         if account_type is not None:
             filters.append(User.account_type == account_type)
+        if account_state is not None:
+            filters.append(User.account_state == account_state)
 
         if filters: 
             stmt = stmt.where(*filters)
@@ -35,8 +38,21 @@ class UserAccountRepository(BaseRepository):
         return self.session.execute(stmt).scalars().all()
 
 
-    def insert_user(self, name: str, email: str, password: str, type: AccountType) -> User:
-        user = User(name = name, email = email, password = password, account_type = type)
+    def insert_user(
+            self, 
+            name: str, 
+            email: str, 
+            password: str, 
+            type: AccountType,
+            state: AccountState = AccountState.ACTIVE
+        ) -> User:
+        user = User(
+            name = name, 
+            email = email, 
+            password = password, 
+            account_type = type,
+            account_state = state
+        )
         self.session.add(user)
 
         return user

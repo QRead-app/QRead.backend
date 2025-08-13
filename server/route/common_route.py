@@ -44,23 +44,24 @@ def logout():
 @common.route("/get-book", methods=["GET"])
 def get_book():
     data = request.json
-    book = data.get("book")
 
-    id = book.get("id")
-    title = book.get("title")
-    description = book.get("description")
-    author = book.get("author")
-    condition = book.get("condition")
+    id = data.get("id")
+    title = data.get("title")
+    description = data.get("description")
+    author = data.get("author")
+    condition = data.get("condition")
 
-    try:
-        id = Book.str_to_int()
-    except ConversionError:
-        return jsonify({"error": f"Invalid book id {id}"}), 400
+    if id is not None:
+        try:
+            id = Book.str_to_int(id)
+        except ConversionError:
+            return jsonify({"error": f"Invalid book id {id}"}), 400
     
-    try:
-        condition = Book.str_to_book_condition()
-    except ConversionError:
-        return jsonify({"error": f"Invalid book condition {condition}"}), 400
+    if condition is not None:
+        try:
+            condition = Book.str_to_book_condition(condition)
+        except ConversionError:
+            return jsonify({"error": f"Invalid book condition {condition}"}), 400
 
     try:
         result = CommonService(g.Session).get_book(

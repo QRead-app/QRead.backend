@@ -26,7 +26,7 @@ def register():
     try:
         BorrowerService(g.Session).register(name, email, password)
     except EmailAlreadyExistsError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": f"Email {email} is already registered"}), 400
 
     return jsonify({"message": "Registered"}), 200
 
@@ -41,10 +41,10 @@ def borrow():
     
     for n in range(len(book_ids)):
         try:
-            book_ids = Book.str_to_int(book_ids[n])
+            book_ids[n] = Book.str_to_int(book_ids[n])
         except ConversionError:
             return jsonify({"error": f"Invalid Book id {book_ids[n]}"}), 400
-    
+
     try:
         BorrowerService(g.Session).borrow_book(
             session["session"]["id"], book_ids)
