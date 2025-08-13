@@ -40,6 +40,5 @@ def create_app():
 
     return app
 
-@app.errorhandler(DatabaseError)
 def handle_database_error(e):
     return jsonify({"error": "Internal server error"}), 500
