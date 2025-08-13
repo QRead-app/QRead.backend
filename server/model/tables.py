@@ -36,14 +36,14 @@ class Base(DeclarativeBase):
     @staticmethod
     def str_to_int(str: str) -> int:
         try:
-            int(str)
+            return int(str)
         except ValueError:
             raise ConversionError(f"Error converting {str} to int")
         
     @staticmethod
     def str_to_decimal(str: str) -> Decimal:
         try:
-            Decimal(str)
+            return Decimal(str)
         except ValueError:
             raise ConversionError(f"Error converting {str} to Decimal")
 
