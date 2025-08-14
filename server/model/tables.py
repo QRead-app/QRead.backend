@@ -73,6 +73,7 @@ class User(Base):
     def to_dict(self):
         dict = super().to_dict()
         dict["account_type"] = self.account_type.name
+        dict["account_state"] = self.account_state.name
 
         return dict
     

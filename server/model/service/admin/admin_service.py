@@ -1,3 +1,4 @@
+from server.exceptions import RecordNotFoundError
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
 from server.model.tables import AccountState, AccountType, User
@@ -17,13 +18,18 @@ class AdminService(BaseService):
         account_type: AccountType = None,
         account_state: AccountState = None
     ) -> list[User]:
-        return UserAccountRepository(self.session).get_user(
+        users = UserAccountRepository(self.session).get_user(
             id=id,
             name=name,
             email=email,
             account_type=account_type,
             account_state=account_state
         )
+
+        if len(users) == 0:
+            raise RecordNotFoundError()
+        
+        return users
 
     @transactional
     def suspend_user(self, user: User) -> User:
