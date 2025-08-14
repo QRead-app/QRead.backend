@@ -1,6 +1,6 @@
 from ..tables import Book, BookCondition
 from .base_repository import BaseRepository
-from sqlalchemy import select, text
+from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
 
 class BookRepository(BaseRepository):
@@ -42,8 +42,8 @@ class BookRepository(BaseRepository):
 
         filters = []
         filters.append(Book.title.like(f"%{search}%"))
-        filters.append(Book.description.like(f"%{search}%"))
-        filters.append(Book.author.like(f"%{search}%"))
+        filters.append(or_(Book.description.like(f"%{search}%")))
+        filters.append(or_(Book.author.like(f"%{search}%")))
 
         if filters: 
             stmt = stmt.where(*filters)
