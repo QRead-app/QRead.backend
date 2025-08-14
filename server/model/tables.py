@@ -29,6 +29,10 @@ class AccountState(enum.Enum):
     ACTIVE = 1,
     SUSPENDED = 2
 
+class TransactionType(enum.Enum):
+    BORROW = 1,
+    RETURN = 2
+
 class Base(DeclarativeBase):
     def to_dict(self):
         return {col.name: getattr(self, col.name) for col in self.__table__.columns}
@@ -103,6 +107,7 @@ class Book(Base):
     description: Mapped[Optional[str]]
     author: Mapped[str]
     condition: Mapped[BookCondition]
+    on_loan: Mapped[bool] = mapped_column(server_default="False")
 
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="book")
 
@@ -161,7 +166,7 @@ class BookTransaction(Base):
     book_id = mapped_column(ForeignKey("book.id"), nullable=False)
     date: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
     due: Mapped[datetime]
-    returned: Mapped[bool] = mapped_column(server_default="False")
+    transaction_type: Mapped[TransactionType] = mapped_column(server_default="BORROW")
 
     user: Mapped["User"] = relationship(back_populates="transactions")
     book: Mapped["Book"] = relationship(back_populates="transactions")
