@@ -81,16 +81,10 @@ def app_configuration(app, runner):
         Session = db.get_sessionmaker()
 
         with Session.begin() as session:
-            # Clean up db for testing
-            user_repo.truncate_table()
-            book_repo.truncate_table()
-            fine_repo.truncate_table()
-            transaction_repo.truncate_table()
-
-            runner.invoke(args=["seed-db"])
-
             user_repo = UserAccountRepository(session)
             book_repo = BookRepository(session)
+
+            runner.invoke(args=["seed-db"])
 
             # Insert test users
             user_repo.insert_user(
@@ -126,17 +120,4 @@ def app_configuration(app, runner):
             )
 
         yield app
-
-        with Session.begin() as session:
-            user_repo = UserAccountRepository(session)
-            book_repo = BookRepository(session)
-            fine_repo = FineRepository(session)
-            transaction_repo = BookTransactionRepository(session)
-            
-            # Clean up test users
-            user_repo.truncate_table()
-            book_repo.truncate_table()
-            fine_repo.truncate_table()
-            transaction_repo.truncate_table()
-
-            runner.invoke(args=["seed-db"])
+        

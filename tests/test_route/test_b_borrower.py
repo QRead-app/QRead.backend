@@ -98,7 +98,7 @@ def test_borrow_bad_borrowed(borrower_client):
 
 def test_get_borrowed_bad_unauthorized(client):
     response = client.get(
-        "/borrower/get-borrowed-books"
+        "/borrower/borrowed-books"
     )
 
     assert response.json.get("error") == "Unauthorized"
@@ -106,7 +106,7 @@ def test_get_borrowed_bad_unauthorized(client):
 
 def test_get_borrowed_bad_no_borrowed(borrower_2_client):
     response = borrower_2_client.get(
-        "/borrower/get-borrowed-books"
+        "/borrower/borrowed-books"
     )
 
     assert response.json.get("message") == "No books found"
@@ -114,7 +114,7 @@ def test_get_borrowed_bad_no_borrowed(borrower_2_client):
 
 def test_get_borrowed_good(borrower_client):
     response = borrower_client.get(
-        "/borrower/get-borrowed-books"
+        "/borrower/borrowed-books"
     )
     
     assert response.json.get("message") == "Borrowed book(s) retrieved"

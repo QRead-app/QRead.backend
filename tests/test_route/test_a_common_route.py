@@ -55,12 +55,7 @@ def test_log_out_with_session(client):
 ))
 def test_get_book_bad(client, id, title, condition, message, code):
     response = client.get(
-        "/get-book",
-        json = {
-            "id": id,
-            "title": title,
-            "condition": condition
-        }
+        f"/book?id={id}&title={title}&condition={condition}"
     )
 
     assert ( 
@@ -71,10 +66,7 @@ def test_get_book_bad(client, id, title, condition, message, code):
 
 def test_get_book_good(client):
     response = client.get(
-        "/get-book",
-        json = {
-            "title": "test_title"
-        }
+        "/book?title=test_title"
     )
 
     assert response.json.get("message") == "Book(s) retrieved"
