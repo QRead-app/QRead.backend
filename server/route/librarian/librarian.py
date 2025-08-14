@@ -1,6 +1,6 @@
 from flask import Blueprint, g, jsonify, request
 
-from server.exceptions import ConversionError, DatabaseError
+from server.exceptions import ConversionError, DatabaseError, RecordNotFoundError
 from server.model.service.common_service import CommonService
 from server.model.service.librarian.librarian_service import LibrarianService
 from server.model.tables import AccountType, Book, Fine
@@ -26,16 +26,20 @@ def issue_fine():
 
     try:
         user_id = Fine.str_to_int(user_id)
-        transaction_id = Fine.str_to_int(transaction_id)
-        amount = Fine.str_to_decimal(amount)
-    except ConversionError as e:
-        return jsonify({"error": str(e)}), 400
+    except ConversionError:
+        return jsonify({"error": f"Invalid user_id {user_id}"}), 400
     
     try:
-        LibrarianService(g.Session).issue_fine(
-            user_id, amount, reason)
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+        transaction_id = Fine.str_to_int(transaction_id)
+    except ConversionError as e:
+        return jsonify({"error": f"Invalid transaction id {transaction_id}"}), 400
+        
+    try:
+        amount = Fine.str_to_decimal(amount)
+    except ConversionError as e:
+        return jsonify({"error": f"Invalid amount {amount}"}), 400
+    
+    LibrarianService(g.Session).issue_fine(user_id, amount, reason)
     
     return jsonify({"message": "Fine issued successfully"}), 200
 
@@ -60,17 +64,13 @@ def add_book():
     try:
         condition = Book.str_to_book_condition(condition)
     except ConversionError as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"error": f"Invalid condition {condition}"}), 400
 
-    try:
-        LibrarianService(g.Session).add_book(
-            title, description, author, condition)
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+    LibrarianService(g.Session).add_book(title, description, author, condition)
     
     return jsonify({"message": "Book added successfully"}), 200
 
-@librarian.route("/search-books", methods=["POST"])
+@librarian.route("/search-books", methods=["GET"])
 @requires_auth(AccountType.LIBRARIAN)
 def search_books():
     data = request.json
@@ -78,8 +78,8 @@ def search_books():
 
     try:
         data = LibrarianService(g.Session).search_books(search)
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+    except RecordNotFoundError:
+        return jsonify({"message": "No book found"}), 200
     
     return jsonify({
         "message": "Book search success",
@@ -92,15 +92,18 @@ def remove_book():
     data = request.json
     book_id = data.get("book_id")
 
+    if book_id is None:
+        return jsonify({"error": "Missing book_id field"}), 400
+
     try:
         book_id = Book.str_to_int(book_id)
     except ConversionError as e:
-        return jsonify({"error": str(e)}), 400 
+        return jsonify({"error": "Invalid book_id {book_id}"}), 400 
 
     try:
         data = LibrarianService(g.Session).remove_book(book_id)
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+    except RecordNotFoundError:
+        return jsonify({"error": f"Book id {book_id} not found"}), 404
     
     return jsonify({"message": "Book removed successfully"}), 200
 
@@ -114,28 +117,33 @@ def update_book():
     book_author = data.get("author")
     book_condition = data.get("condition")
 
+    if book_id is None:
+        return jsonify({"error": "Missing id field"}), 400
+
+    try:
+        book_id = Book.str_to_int(book_id)
+    except ConversionError:
+        return jsonify({"error": f"Invalid id {book_id}"})
+
     if book_condition:
         try:
             book_condition = Book.str_to_book_condition(book_condition)
         except ConversionError as e:
-            return jsonify({"error": str(e)}), 400 
+            return jsonify({"error": f"Invalid condition {book_condition}"}), 400 
 
     new_book = Book(
-        id=book_id,
-        title=book_title,
-        description=book_description,
-        author=book_author,
-        condition=book_condition
+        id = book_id,
+        title = book_title,
+        description = book_description,
+        author = book_author,
+        condition = book_condition
     )
 
     try:
-        old_book = CommonService(g.Session).get_book(id=book_id)
+        old_book = CommonService(g.Session).get_book(id = book_id)
+    except RecordNotFoundError:
+        return jsonify({"error": f"Book {book_id} does not exist"}), 404 
 
-        if len(old_book) == 0:
-            return jsonify({"error": "Book {book_id} does not exist"}), 404 
-
-        LibrarianService(g.Session).update_book(old_book[0], new_book)
-    except DatabaseError as e:
-        return jsonify({"error": str(e)}), 500
+    LibrarianService(g.Session).update_book(old_book[0], new_book)
     
-    return jsonify({"message": "Book removed successfully"}), 200
+    return jsonify({"message": "Book updated successfully"}), 200

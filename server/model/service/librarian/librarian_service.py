@@ -1,4 +1,5 @@
 from decimal import Decimal
+from server.exceptions import DatabaseError, RecordNotFoundError
 from server.model.repository.book_repository import BookRepository
 from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
@@ -28,18 +29,30 @@ class LibrarianService(BaseService):
     def search_books(self, search: str) -> list[Book]:
         books = BookRepository(self.session).search_books(search)
 
+        if len(books) == 0:
+            raise RecordNotFoundError()
+
         return books
     
     @transactional
     def remove_book(self, book_id: int) -> None:
         book_repo = BookRepository(self.session)
 
-        book = book_repo.get_book(id=book_id)[0]
+        book = book_repo.get_book(id=book_id)
+
+        if len(book) == 0:
+            raise RecordNotFoundError()
+        
+        if len(book) > 1:
+            raise DatabaseError()
+
         book_repo.delete_book(book)
     
     @transactional
-    def update_book(self, old_book: Book, new_book: Book) -> None:
+    def update_book(self, old_book: Book, new_book: Book) -> Book:
         for attr in ("title", "description", "author", "condition"):
             val = getattr(new_book, attr)
             if val is not None:
                 setattr(old_book, attr, val)
+
+        return old_book
