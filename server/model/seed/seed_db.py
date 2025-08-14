@@ -3,6 +3,8 @@ import random
 
 from decimal import Decimal
 from datetime import datetime, timedelta
+
+from server.model.repository.book_return_repository import BookReturnRepository
 from ..db import DB
 from flask import Flask
 from .seeds import name, title, description, fine_reason
@@ -39,12 +41,14 @@ def seed_db_command():
         book_repo = BookRepository(session)
         transaction_repo = BookTransactionRepository(session)
         fine_repo = FineRepository(session)
+        return_repo = BookReturnRepository(session)
         
         # Truncate all tables
         fine_repo.truncate_table()
         transaction_repo.truncate_table()
         book_repo.truncate_table()
         user_account_repo.truncate_table()
+        return_repo.truncate_table()
 
         # Seed user accounts
         print("Seeding user accounts...")
@@ -55,13 +59,16 @@ def seed_db_command():
         for n in range(len(names)):
             type = random.sample(
                 [type.value for type in AccountType], counts=[1, 3, 5], k=1)[0]
-            user_account_repo.insert_user(
+            user = user_account_repo.insert_user(
                 names[n], 
                 emails[n], 
                 names[n].replace(" ", ""), 
                 AccountType(type).name,
                 AccountState.ACTIVE
             )
+
+            if AccountType(type).name == AccountType.LIBRARIAN.name:
+                librarian = user
 
         # Seed books
         print("Seeding books...")
@@ -77,12 +84,13 @@ def seed_db_command():
                 titles[n], 
                 descriptions[n], 
                 author, 
-                BookCondition(condition).name)
+                BookCondition(condition).name
+            )
 
         session.flush()
 
         # Seed book transactions and fines
-        print("Seeding transactions and fines...")
+        print("Seeding transactions, fines & book return...")
         for n in range(50):
             transaction_name = names[random.randrange(len(names))]
             transaction_title = titles[random.randrange(len(titles))]
@@ -106,5 +114,10 @@ def seed_db_command():
             
             fine_repo.insert_fine(
                 transaction_user.id, transaction.id, amount, reason)
+
+            return_repo.insert_book_return(
+                transaction.id,
+                librarian.id
+            )
 
         print("Committing changes...")
