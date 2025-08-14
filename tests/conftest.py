@@ -77,12 +77,18 @@ def runner(app):
 @pytest.fixture(scope="session", autouse=True)
 def app_configuration(app, runner):
     with app.app_context():
-        runner.invoke(args=["seed-db"])
-
         db = DB(app.config["TEST_CONNECTION_STRING"])
         Session = db.get_sessionmaker()
 
         with Session.begin() as session:
+            # Clean up db for testing
+            user_repo.truncate_table()
+            book_repo.truncate_table()
+            fine_repo.truncate_table()
+            transaction_repo.truncate_table()
+
+            runner.invoke(args=["seed-db"])
+
             user_repo = UserAccountRepository(session)
             book_repo = BookRepository(session)
 
@@ -132,3 +138,5 @@ def app_configuration(app, runner):
             book_repo.truncate_table()
             fine_repo.truncate_table()
             transaction_repo.truncate_table()
+
+            runner.invoke(args=["seed-db"])
