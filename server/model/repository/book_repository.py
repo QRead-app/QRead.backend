@@ -14,6 +14,7 @@ class BookRepository(BaseRepository):
         description: str | None = None, 
         author: str | None = None, 
         condition: BookCondition | None = None, 
+        on_loan: bool | None = None
     ) -> list[Book]:
         stmt = select(Book)
 
@@ -28,6 +29,8 @@ class BookRepository(BaseRepository):
             filters.append(Book.author == author)
         if condition is not None:
             filters.append(Book.condition == condition)
+        if on_loan is not None:
+            filters.append(Book.on_loan == on_loan)
 
         if filters: 
             stmt = stmt.where(*filters)
