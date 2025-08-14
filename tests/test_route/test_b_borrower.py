@@ -88,7 +88,7 @@ def test_borrow_bad_borrowed(borrower_client):
             "book_ids": [current_app.config["test_book"]["id"]]
         }
     )
-
+    
     assert response.json.get("error") == f"Book id {current_app.config['test_book']['id']} has already been borrowed"
     assert response.status_code == 400
 

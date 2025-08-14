@@ -120,4 +120,6 @@ def app_configuration(app, runner):
             )
 
         yield app
-        
+
+        with Session.begin() as session:
+            runner.invoke(args=["seed-db"])
