@@ -42,14 +42,16 @@ class CommonService(BaseService):
         title: str | None = None, 
         description: str | None = None, 
         author: str | None = None, 
-        condition: BookCondition | None = None
+        condition: BookCondition | None = None,
+        on_loan: bool | None = None
     ) -> list[Book]:
         books = BookRepository(self.session).get_book(
             id,
             title,
             description,
             author,
-            condition
+            condition,
+            on_loan
         )
 
         if len(books) == 0:

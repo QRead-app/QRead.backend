@@ -29,10 +29,6 @@ class AccountState(enum.Enum):
     ACTIVE = 1,
     SUSPENDED = 2
 
-class TransactionType(enum.Enum):
-    BORROW = 1,
-    RETURN = 2
-
 class Base(DeclarativeBase):
     def to_dict(self):
         return {col.name: getattr(self, col.name) for col in self.__table__.columns}
@@ -63,6 +59,7 @@ class User(Base):
 
     fines: Mapped[List["Fine"]] = relationship(back_populates="user")
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="user")
+    book_returns: Mapped[List["BookReturn"]] = relationship(back_populates="user")
 
     def __repr__(self):
         return f"""
@@ -88,14 +85,14 @@ class User(Base):
     @staticmethod
     def str_to_account_type(str: str) -> AccountType:
         try:
-            AccountType[str.upper()]
+            return AccountType[str.upper()]
         except KeyError:
             raise ConversionError(f"Error converting {str} to AccountType ENUM")
         
     @staticmethod
     def str_to_account_state(str: str) -> AccountState:
         try:
-            AccountState[str.upper()]
+            return AccountState[str.upper()]
         except KeyError:
             raise ConversionError(f"Error converting {str} to AccountState ENUM")
 
@@ -117,7 +114,8 @@ class Book(Base):
             title: {self.title}, 
             description: {self.description}, 
             author: {self.author}, 
-            condition: {self.condition}
+            condition: {self.condition},
+            on_loan: {self.on_loan}
         """
     
     def to_dict(self):
@@ -129,7 +127,7 @@ class Book(Base):
     @staticmethod
     def str_to_book_condition(str: str) -> BookCondition:
         try:
-            BookCondition[str.upper()]
+            return BookCondition[str.upper()]
         except KeyError:
             raise ConversionError(f"Error converting {str} to BookCondition ENUM")
 
@@ -166,11 +164,12 @@ class BookTransaction(Base):
     book_id = mapped_column(ForeignKey("book.id"), nullable=False)
     date: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
     due: Mapped[datetime]
-    transaction_type: Mapped[TransactionType] = mapped_column(server_default="BORROW")
+    returned: Mapped[bool] = mapped_column(server_default="False")
 
     user: Mapped["User"] = relationship(back_populates="transactions")
     book: Mapped["Book"] = relationship(back_populates="transactions")
     fine: Mapped["Fine"] = relationship(back_populates="transaction")
+    book_return: Mapped["BookReturn"] = relationship(back_populates="book_transaction")
 
     def __repr__(self):
         return f"""
@@ -178,6 +177,24 @@ class BookTransaction(Base):
             user_id: {self.user_id}, 
             book_id: {self.book_id},
             date: {self.date}, 
-            due: {self.due}, 
-            returned: {self.returned}
+            due: {self.due}
+        """
+    
+class BookReturn(Base):
+    __tablename__ = "book_return"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    book_transaction_id = mapped_column(ForeignKey("book_transaction.id"), nullable=False)
+    date: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
+    librarian_id = mapped_column(ForeignKey("user_account.id"), nullable=False)
+
+    book_transaction: Mapped["BookTransaction"] = relationship(back_populates="book_return")
+    user: Mapped["User"] = relationship(back_populates="book_returns")
+
+    def __repr__(self):
+        return f"""
+            id: {self.id}, 
+            book_transaction_id: {self.book_transaction_id},
+            date: {self.date}, 
+            librarian_id: {self.librarian_id}
         """

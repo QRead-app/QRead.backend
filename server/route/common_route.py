@@ -41,15 +41,16 @@ def logout():
     
     return jsonify({"message": "No active session"}), 200
 
-@common.route("/get-book", methods=["GET"])
+@common.route("/book", methods=["GET"])
 def get_book():
-    data = request.json
+    data = request.args
 
     id = data.get("id")
     title = data.get("title")
     description = data.get("description")
     author = data.get("author")
     condition = data.get("condition")
+    on_loan = data.get("on_loan")
 
     if id is not None:
         try:
@@ -62,6 +63,10 @@ def get_book():
             condition = Book.str_to_book_condition(condition)
         except ConversionError:
             return jsonify({"error": f"Invalid book condition {condition}"}), 400
+        
+    if on_loan is not None:
+        if type(on_loan) is not bool:
+            return jsonify({"error": f"Invalid on_load {on_loan}"}), 400
 
     try:
         result = CommonService(g.Session).get_book(
@@ -70,6 +75,7 @@ def get_book():
             description,
             author,
             condition,
+            on_loan
         )
     except RecordNotFoundError:
         return jsonify({"message": "No book found"}), 200

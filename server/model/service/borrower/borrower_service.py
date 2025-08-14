@@ -40,14 +40,12 @@ class BorrowerService(BaseService):
 
             if len(book_check) == 0:
                 raise RecordNotFoundError(book_id)
+            
+            if len(book_check) > 1:
+                raise DatabaseError()
 
             # Check if book is borrowed
-            result = transaction_repo.get_transactions(
-                book_id = book_id,
-                returned = False
-            )
-
-            if len(result) != 0:
+            if book_check[0].on_loan:
                 raise BookBorrowingError(book_id)
             
             book = transaction_repo.insert_transaction(
@@ -55,6 +53,7 @@ class BorrowerService(BaseService):
                 book_id = book_id,
                 due_date = datetime.now() + timedelta(days=14)
             )
+            book_check[0].on_loan = True
             books_borrowed.append(book)
 
         return books_borrowed

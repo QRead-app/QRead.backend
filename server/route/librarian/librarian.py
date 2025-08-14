@@ -8,7 +8,7 @@ from server.route.requires_auth_wrapper import requires_auth
 
 librarian = Blueprint('librarian', __name__, url_prefix="/librarian")
 
-@librarian.route("/issue-fine", methods=["POST"])
+@librarian.route("/fine", methods=["POST"])
 @requires_auth(AccountType.LIBRARIAN)
 def issue_fine():
     data = request.json
@@ -43,7 +43,7 @@ def issue_fine():
     
     return jsonify({"message": "Fine issued successfully"}), 200
 
-@librarian.route("/add-book", methods=["POST"])
+@librarian.route("/book", methods=["POST"])
 @requires_auth(AccountType.LIBRARIAN)
 def add_book():
     data = request.json
@@ -70,23 +70,27 @@ def add_book():
     
     return jsonify({"message": "Book added successfully"}), 200
 
-@librarian.route("/search-books", methods=["GET"])
+@librarian.route("/books", methods=["GET"])
 @requires_auth(AccountType.LIBRARIAN)
 def search_books():
-    data = request.json
+    data = request.args
     search = data.get("search")
 
     try:
-        data = LibrarianService(g.Session).search_books(search)
+        books = LibrarianService(g.Session).search_books(search)
     except RecordNotFoundError:
         return jsonify({"message": "No book found"}), 200
     
+    result = []
+    for book in books:
+        result.append(book.to_dict())
+
     return jsonify({
         "message": "Book search success",
         "data": data   
     }), 200
 
-@librarian.route("/remove-book", methods=["POST"])
+@librarian.route("/book", methods=["DELETE"])
 @requires_auth(AccountType.LIBRARIAN)
 def remove_book():
     data = request.json
@@ -107,7 +111,7 @@ def remove_book():
     
     return jsonify({"message": "Book removed successfully"}), 200
 
-@librarian.route("/update-book", methods=["POST"])
+@librarian.route("/book", methods=["PUT"])
 @requires_auth(AccountType.LIBRARIAN)
 def update_book():
     data = request.json

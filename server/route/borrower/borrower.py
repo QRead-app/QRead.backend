@@ -55,7 +55,7 @@ def borrow():
     
     return jsonify({"message": "Book(s) borrowed successfully"}), 200
 
-@borrower.route("/get-borrowed-books", methods=["GET"])
+@borrower.route("/borrowed-books", methods=["GET"])
 @requires_auth(AccountType.BORROWER)
 def get_borrowed_books():
     borrowed_books: list[Book] = []
@@ -76,7 +76,7 @@ def get_borrowed_books():
         "data": borrowed_books_dict
     }), 200
 
-@borrower.route("/get-fines", methods=["GET"])
+@borrower.route("/fines", methods=["GET"])
 @requires_auth(AccountType.BORROWER)
 def get_fines():
     fines: list[Fine] = []

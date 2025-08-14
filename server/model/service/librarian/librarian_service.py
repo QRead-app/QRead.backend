@@ -50,7 +50,7 @@ class LibrarianService(BaseService):
     
     @transactional
     def update_book(self, old_book: Book, new_book: Book) -> Book:
-        for attr in ("title", "description", "author", "condition"):
+        for attr in ("title", "description", "author", "condition", "on_loan"):
             val = getattr(new_book, attr)
             if val is not None:
                 setattr(old_book, attr, val)
