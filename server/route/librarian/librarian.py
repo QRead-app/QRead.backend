@@ -95,7 +95,7 @@ def search_books():
 @librarian.route("/book", methods=["DELETE"])
 @requires_auth(AccountType.LIBRARIAN)
 def remove_book():
-    data = request.json
+    data = request.args
     book_id = data.get("book_id")
 
     if book_id is None:
