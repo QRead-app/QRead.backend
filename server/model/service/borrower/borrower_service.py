@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Tuple
 from server.exceptions import BookBorrowingError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
@@ -78,7 +77,34 @@ class BorrowerService(BaseService):
         return borrowed_books
     
     @transactional
-    def get_fines(self, user_id: int) -> Tuple[list[Fine], list[Book]]:
+    def get_borrow_history(self, user_id: int) -> list[tuple[Book, BookTransaction]]:
+        transaction_repo = BookTransactionRepository(self.session)
+        book_repo = BookRepository(self.session)
+
+        transaction_history = transaction_repo.get_transactions(
+            user_id = user_id
+        )
+
+        if len(transaction_history) == 0:
+            raise RecordNotFoundError()
+
+        result: list[tuple[Book, BookTransaction]] = []
+
+        for transaction in transaction_history:
+            book = book_repo.get_book(id = transaction.book_id)
+
+            if len(book) == 0:
+                raise RecordNotFoundError(transaction.book_id)
+            
+            if len(book) > 1:
+                raise DatabaseError()
+            
+            result.append((transaction, book[0]))
+
+        return result
+    
+    @transactional
+    def get_fines(self, user_id: int) -> tuple[list[Fine], list[Book]]:
         fine_repo = FineRepository(self.session)
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)

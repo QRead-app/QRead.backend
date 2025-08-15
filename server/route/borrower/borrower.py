@@ -76,6 +76,23 @@ def get_borrowed_books():
         "data": borrowed_books_dict
     }), 200
 
+@borrow.route("/borrow-history", methods=["GET"])
+@requires_auth(AccountType.BORROWER)
+def get_borrow_history():
+    try:
+        history = BorrowerService(g.Session).get_borrow_history(
+            session["session"]["id"]
+        )
+    except RecordNotFoundError as e:
+        if e:
+            return jsonify({"error": f"Missing book id {e}"}), 500
+        return jsonify({"message": "No borrow history"}), 200
+    
+    return jsonify({
+        "message": "Book history retrieved",
+        "data": history
+    }), 200
+
 @borrower.route("/fines", methods=["GET"])
 @requires_auth(AccountType.BORROWER)
 def get_fines():
