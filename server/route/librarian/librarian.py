@@ -19,6 +19,8 @@ def issue_fine():
     
     if user_id is None:
         return jsonify({"error": "Missing user_id field"}), 400
+    if transaction_id is None:
+        return jsonify({"error": "Missing transaction_id field"}), 400
     if amount is None:
         return jsonify({"error": "Missing amount field"}), 400
     if reason is None:
