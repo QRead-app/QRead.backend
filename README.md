@@ -99,7 +99,7 @@ Skip this if you are using Kayne's neondb as I have already set everything up
 
 - Seed command
   ```sh
-  Flask --app seed-db run
+  Flask --app server seed-db
   ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
