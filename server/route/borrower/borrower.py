@@ -85,7 +85,7 @@ def get_borrow_history():
         )
     except RecordNotFoundError as e:
         if e:
-            return jsonify({"error": f"Missing book id {e}"}), 500
+            raise DatabaseError()
         return jsonify({"message": "No borrow history"}), 200
     
     return jsonify({
