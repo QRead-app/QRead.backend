@@ -90,7 +90,13 @@ def get_borrow_history():
     
     return jsonify({
         "message": "Book history retrieved",
-        "data": history
+        "data": [
+            {
+                "book": book.to_dict(),
+                "transaction:": transaction.to_dict()
+            }
+            for book, transaction in history
+        ]
     }), 200
 
 @borrower.route("/fines", methods=["GET"])
