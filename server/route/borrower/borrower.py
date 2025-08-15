@@ -65,15 +65,16 @@ def get_borrowed_books():
             session["session"]["id"])
     except RecordNotFoundError:
         return jsonify({"message": "No books found"}), 200
-    
-    borrowed_books_dict = []
-
-    for book in borrowed_books:
-        borrowed_books_dict.append(book.to_dict())
 
     return jsonify({
         "message": "Borrowed book(s) retrieved",
-        "data": borrowed_books_dict
+        "data": [
+            {
+                "book": book.to_dict(),
+                "transaction:": transaction.to_dict()
+            }
+            for book, transaction in borrowed_books
+        ]
     }), 200
 
 @borrow.route("/borrow-history", methods=["GET"])
@@ -93,9 +94,10 @@ def get_borrow_history():
         "data": [
             {
                 "book": book.to_dict(),
-                "transaction:": transaction.to_dict()
+                "transaction:": transaction.to_dict(),
+                "return": book_return.to_dict()
             }
-            for book, transaction in history
+            for book, transaction, book_return in history
         ]
     }), 200
 
