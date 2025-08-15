@@ -340,6 +340,147 @@ paths:
                   error:
                     type: string
                     example: "Unauthorized"
+  /borrower/borrow-history:
+    get:
+      summary: Get borrower's borrow history
+      tags:
+        - Borrower
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book history retrieved"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        book:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 12
+                            title:
+                              type: string
+                              example: test_title
+                            description:
+                              type: string
+                              example: test_description
+                            author:
+                              type: string
+                              example: test_author
+                            condition:
+                              type: string
+                              enum:
+                                [
+                                  NEW,
+                                  LIKE_NEW,
+                                  VERY_GOOD,
+                                  GOOD,
+                                  FAIR,
+                                  WORN,
+                                  DAMAGED,
+                                  UNUSABLE,
+                                ]
+                              example: NEW
+                            on_loan:
+                              type: boolean
+                              example: False
+                        transaction:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 39
+                            user_id:
+                              type: integer
+                              example: 92
+                            book_id:
+                              type: integer
+                              example: 94
+                            date:
+                              type: string
+                              format: datetime
+                              example: 2025-08-15T17:14:00+08:00
+                            due:
+                              type: string
+                              format: datetime
+                              example: 2025-08-15T17:14:00+08:00
+                            returned:
+                              type: boolean
+                              example: False
+                    example:
+                      - book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
+                        transaction:
+                          id: 32
+                          user_id: 329
+                          book_id: 331
+                          date: 2025-08-15T17:14:00+08:00
+                          due: 2025-08-15T17:14:00+08:00
+                          returned: False
+
+                      - book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
+                        transaction:
+                          id: 32
+                          user_id: 329
+                          book_id: 331
+                          date: 2025-08-15T17:14:00+08:00
+                          due: 2025-08-15T17:14:00+08:00
+                          returned: False
+              examples:
+                History retrieved:
+                  value:
+                    message: Book history retrieved
+                    data:
+                      book:
+                        id: 12
+                        title: test_title
+                        description: test_description
+                        author: test_author
+                        condition: NEW
+                        on_loan: false
+                      transaction:
+                        id: 32
+                        user_id: 329
+                        book_id: 331
+                        date: 2025-08-15T17:14:00+08:00
+                        due: 2025-08-15T17:14:00+08:00
+                        returned: False
+                No borrow history:
+                  value:
+                    message: No borrow history
+                    data: null
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
   /borrower/register:
     post:
       summary: Register a borrower
