@@ -122,6 +122,7 @@ def update_book():
     book_description = data.get("description")
     book_author = data.get("author")
     book_condition = data.get("condition")
+    book_on_loan = data.get("on_loan")
 
     if book_id is None:
         return jsonify({"error": "Missing id field"}), 400
@@ -142,7 +143,8 @@ def update_book():
         title = book_title,
         description = book_description,
         author = book_author,
-        condition = book_condition
+        condition = book_condition,
+        on_loan = book_on_loan
     )
 
     try:

@@ -12,7 +12,7 @@ admin = Blueprint('admin', __name__, url_prefix="/admin")
 def new_librarian():
     pass
 
-@admin.route("/get-users", methods=["GET"])
+@admin.route("/users", methods=["GET"])
 @requires_auth(AccountType.ADMIN)
 def get_users():
     users = AdminService(g.Session).get_users()
@@ -20,6 +20,9 @@ def get_users():
     data = []
     for user in users:
         data.append(user.to_dict())
+
+    for d in data:
+        del d["password"]
 
     return jsonify({
         "message": "Users retreived",
@@ -33,7 +36,7 @@ def suspend_user():
     user_id = data.get("id")
 
     if user_id is None:
-        return jsonify({"error": f"Missing id field"})
+        return jsonify({"error": f"Missing id field"}), 400
 
     try:
         user_id = User.str_to_int(user_id)
