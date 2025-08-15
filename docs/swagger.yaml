@@ -267,65 +267,110 @@ paths:
                     items:
                       type: object
                       properties:
-                        id:
-                          type: integer
-                          example: 12
-                        title:
-                          type: string
-                          example: test_title
-                        description:
-                          type: string
-                          example: test_description
-                        author:
-                          type: string
-                          example: test_author
-                        condition:
-                          type: string
-                          enum:
-                            [
-                              NEW,
-                              LIKE_NEW,
-                              VERY_GOOD,
-                              GOOD,
-                              FAIR,
-                              WORN,
-                              DAMAGED,
-                              UNUSABLE,
-                            ]
-                          example: NEW
-                        on_loan:
-                          type: boolean
-                          example: False
+                        book:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 12
+                            title:
+                              type: string
+                              example: test_title
+                            description:
+                              type: string
+                              example: test_description
+                            author:
+                              type: string
+                              example: test_author
+                            condition:
+                              type: string
+                              enum:
+                                [
+                                  NEW,
+                                  LIKE_NEW,
+                                  VERY_GOOD,
+                                  GOOD,
+                                  FAIR,
+                                  WORN,
+                                  DAMAGED,
+                                  UNUSABLE,
+                                ]
+                              example: NEW
+                            on_loan:
+                              type: boolean
+                              example: False
+                        transaction:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 39
+                            user_id:
+                              type: integer
+                              example: 92
+                            book_id:
+                              type: integer
+                              example: 94
+                            date:
+                              type: string
+                              format: datetime
+                              example: 2025-08-15T17:14:00+08:00
+                            due:
+                              type: string
+                              format: datetime
+                              example: 2025-08-15T17:14:00+08:00
+                            returned:
+                              type: boolean
+                              example: False
                     example:
-                      - id: 12
-                        title: test_title
-                        description: test_description
-                        author: test_author
-                        condition: NEW
-                        on_loan: false
-                      - id: 15
-                        title: another_book
-                        description: another_description
-                        author: another_author
-                        condition: GOOD
-                        on_loan: true
+                      - book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
+                        transaction:
+                          id: 32
+                          user_id: 329
+                          book_id: 331
+                          date: 2025-08-15T17:14:00+08:00
+                          due: 2025-08-15T17:14:00+08:00
+                          returned: False
+
+                      - book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
+                        transaction:
+                          id: 32
+                          user_id: 329
+                          book_id: 331
+                          date: 2025-08-15T17:14:00+08:00
+                          due: 2025-08-15T17:14:00+08:00
+                          returned: False
               examples:
-                Books retrieved:
+                Borrowed books retrieved:
                   value:
-                    message: Borrowed book(s) retrieved
+                    message: Borrowed books retrieved
                     data:
-                      - id: 12
-                        title: test_title
-                        description: test_description
-                        author: test_author
-                        condition: NEW
-                        on_loan: false
-                      - id: 15
-                        title: another_book
-                        description: another_description
-                        author: another_author
-                        condition: GOOD
-                        on_loan: true
+                      - book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
+                        transaction:
+                          id: 32
+                          user_id: 329
+                          book_id: 331
+                          date: 2025-08-15T17:14:00+08:00
+                          due: 2025-08-15T17:14:00+08:00
+                          returned: False
                 No borrowed books:
                   value:
                     message: No books found
@@ -418,6 +463,22 @@ paths:
                             returned:
                               type: boolean
                               example: False
+                        book_return:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 40
+                            book_transaction_id:
+                              type: integer
+                              example: 32
+                            date:
+                              type: string
+                              format: datetime
+                              example: 2025-08-15T17:14:00+08:00
+                            librarian_id:
+                              type: integer
+                              example: 40
                     example:
                       - book:
                           id: 12
@@ -433,6 +494,11 @@ paths:
                           date: 2025-08-15T17:14:00+08:00
                           due: 2025-08-15T17:14:00+08:00
                           returned: False
+                        book_return:
+                          id: 32
+                          book_transaction_id: 329
+                          date: 2025-08-15T17:14:00+08:00
+                          librarian_id: 32
 
                       - book:
                           id: 12
@@ -448,25 +514,35 @@ paths:
                           date: 2025-08-15T17:14:00+08:00
                           due: 2025-08-15T17:14:00+08:00
                           returned: False
+                        book_return:
+                          id: 32
+                          book_transaction_id: 329
+                          date: 2025-08-15T17:14:00+08:00
+                          librarian_id: 32
               examples:
                 History retrieved:
                   value:
                     message: Book history retrieved
                     data:
-                      book:
-                        id: 12
-                        title: test_title
-                        description: test_description
-                        author: test_author
-                        condition: NEW
-                        on_loan: false
-                      transaction:
-                        id: 32
-                        user_id: 329
-                        book_id: 331
-                        date: 2025-08-15T17:14:00+08:00
-                        due: 2025-08-15T17:14:00+08:00
-                        returned: False
+                      - book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
+                        transaction:
+                          id: 32
+                          user_id: 329
+                          book_id: 331
+                          date: 2025-08-15T17:14:00+08:00
+                          due: 2025-08-15T17:14:00+08:00
+                          returned: False
+                        book_return:
+                          id: 32
+                          book_transaction_id: 329
+                          date: 2025-08-15T17:14:00+08:00
+                          librarian_id: 32
                 No borrow history:
                   value:
                     message: No borrow history
