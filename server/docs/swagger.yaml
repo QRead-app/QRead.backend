@@ -1,0 +1,1121 @@
+openapi: 3.0.4
+info:
+  title: QRead.backend - OpenAPI 3.0
+  description: |-
+    Backend for our QRead FYP project
+  version: "1.0"
+externalDocs:
+  description: Project repository
+  url: https://github.com/QRead-app/QRead.backend
+servers:
+  - url: http://127.0.0.1
+tags:
+  - name: Borrower
+    description: APIs for borrowers
+  - name: Librarian
+    description: APIs for librarians
+  - name: Admin
+    description: APIs for admins
+paths:
+  /{account_type}/login:
+    post:
+      summary: Log in to the system
+      parameters:
+        - in: path
+          name: account_type
+          schema:
+            type: string
+            enum: [ADMIN, LIBRARIAN, BORROWER]
+          required: true
+          description: The user's account type
+      tags:
+        - Librarian
+        - Borrower
+        - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: test@email.com
+                password:
+                  type: string
+                  example: abc123
+      security: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: SESSION=abcde12345; Path=/; HttpOnly
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing email field
+              examples:
+                Missing email:
+                  value:
+                    error: Missing email field
+                Missing password:
+                  value:
+                    error: Missing password field
+                Invalid email:
+                  value:
+                    error: Invalid email test@email.com
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Authentication failed"
+  /logout:
+    post:
+      summary: Log out of the system
+      tags:
+        - Librarian
+        - Admin
+        - Borrower
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Logout successful"
+              examples:
+                Logged out:
+                  value:
+                    message: "Logout successful"
+                No session:
+                  value:
+                    message: "No active session"
+  /book:
+    get:
+      summary: Get book by any parameters
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: false
+          description: The book's ID
+        - in: query
+          name: title
+          schema:
+            type: string
+          required: false
+          description: The book's title
+        - in: query
+          name: description
+          schema:
+            type: string
+          required: false
+          description: The book's description
+        - in: query
+          name: author
+          schema:
+            type: string
+          required: false
+          description: The book's description
+        - in: query
+          name: condition
+          schema:
+            type: string
+            enum:
+              [NEW, LIKE_NEW, VERY_GOOD, GOOD, FAIR, WORN, DAMAGED, UNUSABLE]
+          required: false
+          description: The book's condition
+        - in: query
+          name: on_loan
+          schema:
+            type: boolean
+          required: false
+          description: The book's loan status
+      tags:
+        - Librarian
+        - Borrower
+        - Admin
+      security: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book(s) retrieved"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 12
+                      title:
+                        type: string
+                        example: test_title
+                      description:
+                        type: string
+                        example: test_description
+                      author:
+                        type: string
+                        example: test_author
+                      condition:
+                        type: string
+                        enum:
+                          [
+                            NEW,
+                            LIKE_NEW,
+                            VERY_GOOD,
+                            GOOD,
+                            FAIR,
+                            WORN,
+                            DAMAGED,
+                            UNUSABLE,
+                          ]
+                        example: NEW
+                      on_loan:
+                        type: boolean
+                        example: False
+              examples:
+                bookRetrieved:
+                  summary: Book(s) retrieved
+                  value:
+                    message: "Book(s) retrieved"
+                    data:
+                      id: 12
+                      title: test_title
+                      description: test_description
+                      author: test_author
+                      condition: NEW
+                      on_loan: false
+                noBookFound:
+                  summary: No book found
+                  value:
+                    message: "No book found"
+                    data: null
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing email field
+              examples:
+                Missing email:
+                  value:
+                    error: Missing email field
+                Missing password:
+                  value:
+                    error: Missing password field
+                Invalid email:
+                  value:
+                    error: Invalid email test@email.com
+
+  /borrower/borrowed-books:
+    get:
+      summary: Get borrower's borrowed books
+      tags:
+        - Borrower
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Borrowed book(s) retrieved"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 12
+                        title:
+                          type: string
+                          example: test_title
+                        description:
+                          type: string
+                          example: test_description
+                        author:
+                          type: string
+                          example: test_author
+                        condition:
+                          type: string
+                          enum:
+                            [
+                              NEW,
+                              LIKE_NEW,
+                              VERY_GOOD,
+                              GOOD,
+                              FAIR,
+                              WORN,
+                              DAMAGED,
+                              UNUSABLE,
+                            ]
+                          example: NEW
+                        on_loan:
+                          type: boolean
+                          example: False
+                    example:
+                      - id: 12
+                        title: test_title
+                        description: test_description
+                        author: test_author
+                        condition: NEW
+                        on_loan: false
+                      - id: 15
+                        title: another_book
+                        description: another_description
+                        author: another_author
+                        condition: GOOD
+                        on_loan: true
+              examples:
+                Books retrieved:
+                  value:
+                    message: Borrowed book(s) retrieved
+                    data:
+                      - id: 12
+                        title: test_title
+                        description: test_description
+                        author: test_author
+                        condition: NEW
+                        on_loan: false
+                      - id: 15
+                        title: another_book
+                        description: another_description
+                        author: another_author
+                        condition: GOOD
+                        on_loan: true
+                No borrowed books:
+                  value:
+                    message: No books found
+                    data: null
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+  /borrower/register:
+    post:
+      summary: Register a borrower
+      tags:
+        - Borrower
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: test_name
+                email:
+                  type: string
+                  example: test@email.com
+                password:
+                  type: string
+                  example: abc123
+      security: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Registered"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing email field
+              examples:
+                Missing email:
+                  value:
+                    error: Missing email field
+                Missing name:
+                  value:
+                    error: Missing name field
+                Missing password:
+                  value:
+                    error: Missing password field
+                Invalid email:
+                  value:
+                    error: Invalid email test@email.com
+  /borrower/borrow:
+    post:
+      summary: Borrow a book
+      tags:
+        - Borrower
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book_ids:
+                  type: array
+                  items:
+                    type: integer
+                  example: [3, 7, 12, 38, 46]
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book(s) borrowed successfully"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing book_ids field
+              examples:
+                Missing book_ids:
+                  value:
+                    error: Missing book_ids field
+                Book id not integer:
+                  value:
+                    error: Invalid Book id test
+                Book not found:
+                  value:
+                    error: Book id 7 not found
+                Book already borrowed:
+                  value:
+                    error: Book id 12 has already been borrowed
+  /borrower/fines:
+    post:
+      summary: Get all borrower's fines
+      tags:
+        - Borrower
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Fine(s) retrieved"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 12
+                        user_id:
+                          type: integer
+                          example: 56
+                        transaction_id:
+                          type: integer
+                          example: 192
+                        reason:
+                          type: string
+                          example: Lost book
+                        amount:
+                          type: number
+                          format: double
+                          example: 25.00
+                        date:
+                          type: string
+                          format: date-time
+                          example: 2017-07-21T17:32:28Z
+                        paid:
+                          type: boolean
+                          example: false
+                    example:
+                      - id: 12
+                        user_id: 32
+                        transaction_id: 56
+                        reason: Lost book
+                        amount: 25.00
+                        date: 2017-07-21T17:32:28Z
+                        paid: false
+                      - id: 17
+                        user_id: 32
+                        transaction_id: 59
+                        reason: Lost book
+                        amount: 25.00
+                        date: 2017-07-30T17:32:28Z
+                        paid: true
+              examples:
+                Fines retrieved:
+                  value:
+                    message: Fine(s) retrieved
+                    data:
+                      - id: 12
+                        user_id: 32
+                        transaction_id: 56
+                        reason: Lost book
+                        amount: 25.00
+                        date: 2017-07-21T17:32:28Z
+                        paid: false
+                      - id: 17
+                        user_id: 32
+                        transaction_id: 59
+                        reason: Lost book
+                        amount: 25.00
+                        date: 2017-07-30T17:32:28Z
+                        paid: true
+                No fines:
+                  value:
+                    message: No fines found
+                    data: null
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+  /borrower/pay-fine:
+    post:
+      summary: Pay a fine
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fine_id:
+                  type: integer
+                  example: 87
+      tags:
+        - Borrower
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Fine paid successfully"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing fine_id field
+              examples:
+                Missing fine id:
+                  value:
+                    error: "Missing fine_id field"
+                Invalid fine id:
+                  value:
+                    error: "Invalid fine id 57"
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Fine id not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Fine id 89 not found"
+
+  /librarian/books:
+    get:
+      summary: Get all book by matching (may be deprecated due to /book)
+      parameters:
+        - in: query
+          name: search
+          schema:
+            type: string
+          required: false
+          description: The search term
+      tags:
+        - Librarian
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book search success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 12
+                        title:
+                          type: string
+                          example: test_title
+                        description:
+                          type: string
+                          example: test_description
+                        author:
+                          type: string
+                          example: test_author
+                        condition:
+                          type: string
+                          enum:
+                            [
+                              NEW,
+                              LIKE_NEW,
+                              VERY_GOOD,
+                              GOOD,
+                              FAIR,
+                              WORN,
+                              DAMAGED,
+                              UNUSABLE,
+                            ]
+                          example: NEW
+                        on_loan:
+                          type: boolean
+                          example: False
+                    example:
+                      - id: 12
+                        title: test_title
+                        description: test_description
+                        author: test_author
+                        condition: NEW
+                        on_loan: false
+                      - id: 15
+                        title: another_book
+                        description: another_description
+                        author: another_author
+                        condition: GOOD
+                        on_loan: true
+              examples:
+                Books retrieved:
+                  value:
+                    message: Book search success
+                    data:
+                      - id: 12
+                        title: test_title
+                        description: test_description
+                        author: test_author
+                        condition: NEW
+                        on_loan: false
+                      - id: 15
+                        title: another_book
+                        description: another_description
+                        author: another_author
+                        condition: GOOD
+                        on_loan: true
+                No books found:
+                  value:
+                    message: No books found
+                    data: null
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+  /librarian/book:
+    delete:
+      summary: Delete a book
+      tags:
+        - Librarian
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: True
+          description: The book id to be deleted
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Book deleted successfully
+        "400":
+          description: Error responses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing book_id field
+              examples:
+                Missing book_id:
+                  value:
+                    error: Missing book_id field
+                Invalid book_id:
+                  value:
+                    error: Invalid book_id test
+        "404":
+          description: Book id not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Book id 50 not found
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+    put:
+      summary: Update a book
+      tags:
+        - Librarian
+      security:
+        - qread.backend_auth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  type: integer
+                  example: 435
+                title:
+                  type: string
+                  example: test_title
+                description:
+                  type: string
+                  example: test_description
+                author:
+                  type: string
+                  example: test_author
+                condition:
+                  type: string
+                  enum:
+                    [
+                      NEW,
+                      LIKE_NEW,
+                      VERY_GOOD,
+                      GOOD,
+                      FAIR,
+                      WORN,
+                      DAMAGED,
+                      UNUSABLE,
+                    ]
+                  example: NEW
+                on_load:
+                  type: boolean
+                  example: False
+      responses:
+        "200":
+          description: Book updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Book updated successfully"
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Missing id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Missing id field"
+  /librarian/fine:
+    post:
+      summary: Issue a fine
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  example: 323
+                transaction_id:
+                  type: integer
+                  example: 230
+                amount:
+                  type: number
+                  format: double
+                  example: 34.50
+                reason:
+                  type: string
+                  example: Damaged book
+      tags:
+        - Librarian
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Fine issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Fine issued successfully
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing user_id field
+              examples:
+                Missing user_id:
+                  value:
+                    error: Missing user_id field
+                Missing transaction_id:
+                  value:
+                    error: Missing transaction_id field
+                Missing amount:
+                  value:
+                    error: Missing amount field
+                Missing reason:
+                  value:
+                    error: Missing reason field
+                Invalid user_id:
+                  value:
+                    error: Invalid user_id test
+                Invalid transaction_id:
+                  value:
+                    error: Invalid transaction_id test
+                Invalid amount:
+                  value:
+                    error: Invalid amount test
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+
+  /admin/users:
+    get:
+      summary: Retrieve all users
+      tags:
+        - Admin
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Users retrieved
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 12
+                        name:
+                          type: string
+                          example: name
+                        email:
+                          type: string
+                          example: test@email.com
+                        account_type:
+                          type: string
+                          enum: [ADMIN, LIBRARIAN, BORROWER]
+                          example: LIBRARIAN
+                        account_state:
+                          type: string
+                          enum: [ACTIVE, SUSPENDED]
+                          example: ACTIVE
+                    example:
+                      - id: 12
+                        name: admin_name
+                        email: admin@email.com
+                        account_type: ADMIN
+                        account_state: ACTIVE
+                      - id: 15
+                        name: librarian_name
+                        email: lib@email.com
+                        account_type: LIBRARIAN
+                        account_state: SUSPENDED
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+  /admin/suspend-user:
+    post:
+      summary: Suspend a user
+      tags:
+        - Admin
+      security:
+        - qread.backend_auth: []
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 49
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User suspended successfully"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing id field
+              examples:
+                Missing id:
+                  value:
+                    error: Missing id field
+                Invalid id:
+                  value:
+                    error: Invalid if 49
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: User id not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User id 48 not found
+  /admin/reinstate-user:
+    post:
+      summary: Reinstate a user
+      tags:
+        - Admin
+      security:
+        - qread.backend_auth: []
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 49
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User reinstated successfully"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing id field
+              examples:
+                Missing id:
+                  value:
+                    error: Missing id field
+                Invalid id:
+                  value:
+                    error: Invalid if 49
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: User id not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User id 48 not found
+
+components:
+  securitySchemes:
+    qread.backend_auth:
+      type: apiKey
+      in: cookie
+      name: session
