@@ -1061,6 +1061,74 @@ paths:
                   error:
                     type: string
                     example: "Unauthorized"
+  /librarian/return-book:
+    post:
+      summary: Return a book
+      requestBody:
+        required: True
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  example: 323
+      tags:
+        - Librarian
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Fine issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Book returned successfully
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing id field
+              examples:
+                Missing id:
+                  value:
+                    error: Missing user_id field
+                Invalid id:
+                  value:
+                    error: Invalid id test
+                Book not borrowed:
+                  value:
+                    error: Book id 50 is not borrowed
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Book not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Book id 49 not found
 
   /admin/users:
     get:
