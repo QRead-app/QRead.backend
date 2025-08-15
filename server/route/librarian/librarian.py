@@ -1,6 +1,6 @@
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, g, jsonify, request, session
 
-from server.exceptions import ConversionError, DatabaseError, RecordNotFoundError
+from server.exceptions import BookBorrowingError, ConversionError, DatabaseError, RecordNotFoundError
 from server.model.service.common_service import CommonService
 from server.model.service.librarian.librarian_service import LibrarianService
 from server.model.tables import AccountType, Book, Fine
@@ -155,3 +155,29 @@ def update_book():
     LibrarianService(g.Session).update_book(old_book[0], new_book)
     
     return jsonify({"message": "Book updated successfully"}), 200
+
+@librarian.route("/return-book", methods=["POST"])
+@requires_auth(AccountType.LIBRARIAN)
+def return_book():
+    data = request.json
+    book_id = data.get("id")
+
+    if book_id is None:
+        return jsonify({"error": "Missing id field"}), 400
+
+    try:
+        book_id = Book.str_to_int(book_id)
+    except ConversionError:
+        return jsonify({"error": f"Invalid id {book_id}"}), 400
+    
+    try:
+        LibrarianService(g.Session).return_book(
+            session["session"]["id"],
+            book_id
+        )
+    except RecordNotFoundError:
+        return jsonify({"error": f"Book id {book_id} not found"}), 404
+    except BookBorrowingError:
+        return jsonify({"error": f"Book id {book_id} is not borrowed"}), 400
+    
+    return jsonify({"message": "Book returned successfully"}), 200
