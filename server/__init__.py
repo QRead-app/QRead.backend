@@ -1,5 +1,6 @@
 from flask import Flask, g, jsonify
 from flask_caching import Cache
+from flask_cors import CORS
 from server.exceptions import DatabaseError
 from server.model.db import DB
 from server.route.admin.admin import admin
@@ -24,6 +25,7 @@ def create_app():
 
     seed_db.init_app(app)
     otp_cache.init_app(app)
+    CORS(app)
 
     app.register_blueprint(admin)
     app.register_blueprint(borrower)

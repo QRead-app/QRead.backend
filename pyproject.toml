@@ -6,7 +6,7 @@ authors = [
     {name = "lly02",email = "lly.02@outlook.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<4.0"
 dependencies = [
     "flask (>=3.1.1,<4.0.0)",
     "sqlalchemy (>=2.0.42,<3.0.0)",
@@ -14,7 +14,8 @@ dependencies = [
     "psycopg2-binary (>=2.9.10,<3.0.0)",
     "pytest (>=8.4.1,<9.0.0)",
     "argon2-cffi (>=25.1.0,<26.0.0)",
-    "flask-caching (>=2.3.1,<3.0.0)"
+    "flask-caching (>=2.3.1,<3.0.0)",
+    "flask-cors (>=6.0.1,<7.0.0)"
 ]
 
 [tool.poetry]
