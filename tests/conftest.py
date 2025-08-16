@@ -6,6 +6,7 @@ from server.model.repository.book_repository import BookRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
 from server.model.repository.fine_repository import FineRepository
 from server.model.tables import AccountType
+from server.util.hasher import Hasher
 from tests.test_data import *
 from server import create_app
 from server.model.repository.user_account_repository import UserAccountRepository
@@ -83,6 +84,7 @@ def app_configuration(app, runner):
         with Session.begin() as session:
             user_repo = UserAccountRepository(session)
             book_repo = BookRepository(session)
+            hasher = Hasher()
 
             runner.invoke(args=["seed-db"])
 
@@ -90,25 +92,25 @@ def app_configuration(app, runner):
             user_repo.insert_user(
                 name = test_borrower.name,
                 email = test_borrower.email,
-                password = test_borrower.password,
+                password = hasher.hash(test_borrower.password),
                 type = test_borrower.account_type
             )
             user_repo.insert_user(
                 name = test_borrower_2.name,
                 email = test_borrower_2.email,
-                password = test_borrower_2.password,
+                password = hasher.hash(test_borrower_2.password),
                 type = test_borrower_2.account_type
             )
             user_repo.insert_user(
                 name = test_librarian.name,
                 email = test_librarian.email,
-                password = test_librarian.password,
+                password = hasher.hash(test_librarian.password),
                 type = test_librarian.account_type
             )
             user_repo.insert_user(
                 name = test_admin.name,
                 email = test_admin.email,
-                password = test_admin.password,
+                password = hasher.hash(test_admin.password),
                 type = test_admin.account_type
             )
 
