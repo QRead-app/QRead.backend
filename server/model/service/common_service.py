@@ -4,7 +4,7 @@ from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
 from server.model.tables import AccountType, Book, BookCondition, User
 from server.model.repository.user_account_repository import UserAccountRepository
-from server.util.hasher import Hasher
+from server import hasher
 
 class CommonService(BaseService):
     def __init__(self, Session):
@@ -24,8 +24,6 @@ class CommonService(BaseService):
         
         if len(user) == 0:
             raise IncorrectCredentialsError("Authentication failed")
-        
-        hasher = Hasher()
 
         if not hasher.verify(user[0].password, password):
             raise IncorrectCredentialsError("Authentication failed")

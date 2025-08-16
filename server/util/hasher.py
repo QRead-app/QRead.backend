@@ -14,9 +14,6 @@ class Hasher:
             parallelism = 1,
         )
 
-    def init_app(self, app: Flask):
-        app.hasher = self
-
     def hash(self, password: str) -> str:
         try:
             hash = self.hasher.hash(password)
