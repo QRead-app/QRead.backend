@@ -11,8 +11,7 @@ class UserAccountRepository(BaseRepository):
         self, 
         id: int | None = None, 
         name: str | None = None, 
-        email: str | None = None, 
-        password: str | None = None, 
+        email: str | None = None,
         account_type: AccountType | None = None,
         account_state: AccountState | None = None
     ) -> list[User]:
@@ -25,8 +24,6 @@ class UserAccountRepository(BaseRepository):
             filters.append(User.name == name)
         if email is not None:
             filters.append(User.email == email)
-        if password is not None:
-            filters.append(User.password == password)
         if account_type is not None:
             filters.append(User.account_type == account_type)
         if account_state is not None:
