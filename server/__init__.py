@@ -1,6 +1,7 @@
 from flask import Flask, g, jsonify
 from flask_caching import Cache
 from flask_cors import CORS
+from flask_mail import Mail
 from server.exceptions import DatabaseError
 from server.model.db import DB
 from server.route.admin.admin import admin
@@ -10,6 +11,7 @@ from server.route.common_route import common
 from server.model.seed import seed_db
 
 otp_cache = Cache(config={"CACHE_TYPE": "SimpleCache"})
+mail = Mail()
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -27,6 +29,7 @@ def create_app():
 
     seed_db.init_app(app)
     otp_cache.init_app(app)
+    mail.init_app(app)
 
     app.register_blueprint(admin)
     app.register_blueprint(borrower)

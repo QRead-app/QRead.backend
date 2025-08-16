@@ -1,7 +1,9 @@
 from flask import Blueprint, g, request, session, jsonify
-from server.exceptions import ConversionError, DatabaseError, IncorrectCredentialsError, RecordNotFoundError
+from server.exceptions import ConversionError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.service.common_service import CommonService
 from server.model.tables import AccountType, Book, User
+from server.util.mailer import Mailer
+from server.util.otp import OTP
 
 common = Blueprint('common', __name__)
 
@@ -28,8 +30,38 @@ def login(type: str):
         user = CommonService(g.Session).authenticate(email, password, account_type)
     except IncorrectCredentialsError:
         return jsonify({"error": "Authentication failed"}), 401
+    
+    otp = OTP().generate_otp(user.id)
+    Mailer().send_otp(otp)
+    
+    session["authenticate"] = {"id": user.id, "account_type": account_type.name}
 
-    session["session"] = {"id": user.id, "account_type": account_type.name}
+    return jsonify({
+        "message": "Authenticated"
+    }), 200
+
+@common.route("/verify-otp", methods = ["POST"])
+def verify_otp():
+    data = request.json
+    user_id = session.get("authenticate").get("id")
+    otp = data.get("otp")
+
+    if user_id is None:
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    if otp is None:
+        return jsonify({"error": "Missing otp field"}), 400
+
+    try:
+        verification = OTP().verify_otp(user_id, otp)
+    except RecordNotFoundError:
+        return jsonify({"error": "Not authenticated"}), 401
+    
+    if not verification:
+        return jsonify({"error": "Wrong OTP"}), 401 
+    
+    session["session"] = session["authenticate"]
+    del session["authenticate"]
 
     return jsonify({"message": "Login successful"}), 200
 

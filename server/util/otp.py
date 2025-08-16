@@ -1,5 +1,6 @@
 import secrets
 from server import otp_cache
+from server.exceptions import RecordNotFoundError
 
 class OTP:
     def __init__(self):
@@ -12,7 +13,12 @@ class OTP:
         return otp
 
     def verify_otp(self, user_id: int, otp: int) -> bool:
-        verication = otp_cache.get(user_id) == otp
+        cached = otp_cache.get(user_id)
+
+        if cached is None:
+            raise RecordNotFoundError()
+
+        verication = cached == otp
 
         if verication:
             otp_cache.delete(user_id)
