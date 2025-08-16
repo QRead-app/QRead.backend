@@ -1,6 +1,6 @@
 from flask import Blueprint, g, jsonify, request, session
 
-from server.exceptions import BookBorrowingError, ConversionError, DatabaseError, RecordNotFoundError
+from server.exceptions import BookBorrowingError, ConversionError, RecordNotFoundError
 from server.model.service.common_service import CommonService
 from server.model.service.librarian.librarian_service import LibrarianService
 from server.model.tables import AccountType, Book, Fine

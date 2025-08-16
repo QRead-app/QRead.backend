@@ -1,6 +1,5 @@
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, HashingError
-from flask import Flask
 
 from server.exceptions import DatabaseError, IncorrectCredentialsError
 
@@ -32,3 +31,5 @@ class Hasher:
     
     def need_rehash(self, hash: str) -> bool:
         return self.hasher.check_needs_rehash(hash)
+    
+hasher = Hasher()

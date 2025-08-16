@@ -1,11 +1,10 @@
-from flask_mail import Message
-from server import mail
-from server.exceptions import ParameterError
+from flask import current_app
+from flask_mail import Mail, Message
 from server.model.tables import User
 
 class Mailer:
     def __init__(self):
-        self.mailer = mail
+        self.mailer: Mail = current_app.extensions["mail"]
 
     def send_otp(self, to: str, otp: int) -> None:
         if not User.is_email(to):
