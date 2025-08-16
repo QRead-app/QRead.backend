@@ -72,6 +72,14 @@ def seed_db_command():
             if AccountType(type).name == AccountType.LIBRARIAN.name:
                 librarian = user
 
+        user = user_account_repo.insert_user(
+            "yen", 
+            "looiyen2002@gmail.com", 
+            Hasher().hash("yen"), 
+            "ADMIN",
+            "ACTIVE"
+        )
+
         # Seed books
         print("Seeding books...")
 
