@@ -1,10 +1,10 @@
-from flask import current_app
-from flask_mail import Mail, Message
+from flask_mail import Message
 from server.model.tables import User
+from server.util.extensions import mailer as mail
 
 class Mailer:
     def __init__(self):
-        self.mailer: Mail = current_app.extensions["mail"]
+        pass
 
     def send_otp(self, to: str, otp: int) -> None:
         if not User.is_email(to):
@@ -17,5 +17,6 @@ class Mailer:
             body = f"Your OTP is {otp}"
         )
 
-        self.mailer.send(msg)
+        mail.send(msg)
         
+mailer = Mailer()

@@ -2,7 +2,7 @@ from flask import Blueprint, g, request, session, jsonify
 from server.exceptions import ConversionError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.service.common_service import CommonService
 from server.model.tables import AccountType, Book, User
-from server.util.extensions import mailer
+from server.util.mailer import mailer
 from server.util.otp import otp
 
 common = Blueprint('common', __name__)
@@ -32,7 +32,7 @@ def login(type: str):
         return jsonify({"error": "Authentication failed"}), 401
     
     onetimepass = otp.generate_otp(user.id)
-    mailer.send_otp(onetimepass)
+    mailer.send_otp(user.email, onetimepass)
 
     session["authenticate"] = {"id": user.id, "account_type": account_type.name}
 

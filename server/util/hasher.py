@@ -1,5 +1,5 @@
 from argon2 import PasswordHasher
-from argon2.exceptions import VerifyMismatchError, HashingError
+from argon2.exceptions import VerifyMismatchError, HashingError, InvalidHashError
 
 from server.exceptions import DatabaseError, IncorrectCredentialsError
 
@@ -25,6 +25,8 @@ class Hasher:
         try:    
             verification = self.hasher.verify(hash, password)
         except VerifyMismatchError as e:
+            raise IncorrectCredentialsError()
+        except InvalidHashError:
             raise IncorrectCredentialsError()
         
         return verification

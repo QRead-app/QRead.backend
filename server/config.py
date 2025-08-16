@@ -32,6 +32,14 @@ class Config:
 
     CACHE_DEFAULT_TIMEOUT = 300
 
+    MAIL_SERVER = "smtp.gmail.com"
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USE_SSL = False
+    MAIL_DEFAULT_SENDER = "noreply@Qread.com"
+    MAIL_MAX_EMAILS = None
+    MAIL_ASCII_ATTACHMENTS = False
+
 class ProductionConfig(Config):
     PROPAGATE_EXCEPTIONS = False
     TRAP_HTTP_EXCEPTIONS = False

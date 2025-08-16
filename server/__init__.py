@@ -1,6 +1,6 @@
 from flask import Flask, g, jsonify
 from flask_cors import CORS
-from server.util.extensions import *
+from server.util.extensions import otp_cache, mailer
 from server.exceptions import DatabaseError
 from server.model.db import DB
 from server.route.admin.admin import admin
