@@ -44,6 +44,7 @@ def seed_db_command():
         fine_repo = FineRepository(session)
         return_repo = BookReturnRepository(session)
         
+        print("Truncating all tables...")
         # Truncate all tables
         fine_repo.truncate_table()
         transaction_repo.truncate_table()
