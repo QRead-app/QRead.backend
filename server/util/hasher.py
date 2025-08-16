@@ -28,3 +28,6 @@ class Hasher:
             raise IncorrectCredentialsError()
         
         return verification
+    
+    def need_rehash(self, hash: str) -> bool:
+        return self.hasher.check_needs_rehash(hash)

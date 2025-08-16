@@ -25,8 +25,13 @@ class CommonService(BaseService):
         if len(user) == 0:
             raise IncorrectCredentialsError("Authentication failed")
         
-        if not Hasher().verify(user[0].password, password):
+        hasher = Hasher()
+
+        if not hasher.verify(user[0].password, password):
             raise IncorrectCredentialsError("Authentication failed")
+        
+        if hasher.need_rehash(user[0].password):
+            user[0].password = hasher.hash(password)
         
         return user[0]
 
