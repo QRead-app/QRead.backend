@@ -19,7 +19,8 @@ tags:
 paths:
   /{account_type}/login:
     post:
-      summary: Log in to the system
+      summary: Authenticate user
+      description: This API only authenticates user's credentials. An OTP will be sent to the user's email, it should be POST to /verify-otp for successful login, obtaining the session cookie. The OTP should be sent from qread.donotreply@gmail.com.
       parameters:
         - in: path
           name: account_type
@@ -55,12 +56,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Login successful"
-          headers:
-            Set-Cookie:
-              schema:
-                type: string
-                example: SESSION=abcde12345; Path=/; HttpOnly
+                    example: "Authenticated"
         "400":
           description: Error operations
           content:
@@ -91,8 +87,71 @@ paths:
                   error:
                     type: string
                     example: "Authentication failed"
+  /verify-otp:
+    post:
+      description: Verifies the user and assign a session cookie to the user
+      summary: Verify otp and log user in
+      tags:
+        - Librarian
+        - Borrower
+        - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+                  example: 123456
+      security: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: SESSION=abcde12345; Path=/; HttpOnly
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing otp field
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Authentication failed"
+              examples:
+                Wrong OTP:
+                  value:
+                    error: Wrong OTP
+                Not authenticated:
+                  description: The user have not log in via /{account_type}/login
+                  value:
+                    error: Not authenticated
   /logout:
     post:
+      description: Log the user out and remove the session cookie
       summary: Log out of the system
       tags:
         - Librarian
