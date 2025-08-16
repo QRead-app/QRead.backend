@@ -77,7 +77,7 @@ def get_borrowed_books():
         ]
     }), 200
 
-@borrow.route("/borrow-history", methods=["GET"])
+@borrower.route("/borrow-history", methods=["GET"])
 @requires_auth(AccountType.BORROWER)
 def get_borrow_history():
     try:
