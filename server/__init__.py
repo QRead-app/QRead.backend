@@ -17,15 +17,16 @@ def create_app():
 
     if app.config["ENVIRONMENT"] == 'development':
         app.config.from_object('server.config.DevelopmentConfig')
+        CORS(app)
     if app.config["ENVIRONMENT"] == 'production':
         app.config.from_object('server.config.ProductionConfig')
     if app.config["ENVIRONMENT"] == 'testing':
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
+        CORS(app)
 
     seed_db.init_app(app)
     otp_cache.init_app(app)
-    CORS(app)
 
     app.register_blueprint(admin)
     app.register_blueprint(borrower)
