@@ -5,7 +5,7 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 
 from server.model.repository.book_return_repository import BookReturnRepository
-from server import hasher
+from server.util.hasher import Hasher
 from ..db import DB
 from flask import Flask
 from .seeds import name, title, description, fine_reason
@@ -64,7 +64,7 @@ def seed_db_command():
             user = user_account_repo.insert_user(
                 names[n], 
                 emails[n], 
-                hasher.hash(names[n].replace(" ", "")), 
+                Hasher().hash(names[n].replace(" ", "")), 
                 AccountType(type).name,
                 AccountState.ACTIVE
             )

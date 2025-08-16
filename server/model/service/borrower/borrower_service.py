@@ -8,7 +8,7 @@ from server.model.tables import AccountType, Book, BookReturn, BookTransaction, 
 from server.model.repository.user_account_repository import UserAccountRepository
 from server.model.repository.book_repository import BookRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
-from server import hasher
+from server.util.hasher import Hasher
 
 class BorrowerService(BaseService):
     def __init__(self, Session):
@@ -24,7 +24,7 @@ class BorrowerService(BaseService):
         if len(result) > 0:
             raise EmailAlreadyExistsError("The email provided is already registered")
         
-        password = hasher.hash(password)
+        password = Hasher().hash(password)
 
         user = user_repo.insert_user(name, email, password, AccountType.BORROWER)
 

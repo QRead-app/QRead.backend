@@ -7,12 +7,8 @@ from server.route.borrower.borrower import borrower
 from server.route.librarian.librarian import librarian
 from server.route.common_route import common
 from server.model.seed import seed_db
-from server.util.hasher import Hasher
-from server.util.otp import OTP
 
-otp_cache = Cache(config={"CACHE_TYPE": "SIMPLE_CACHE"})
-otp = OTP()
-hasher = Hasher()
+otp_cache = Cache(config={"CACHE_TYPE": "SimpleCache"})
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
