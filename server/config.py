@@ -30,6 +30,8 @@ class Config:
     MAX_FORM_MEMORY_SIZE = 500_000
     MAX_FORM_PARTS = 1_000
 
+    CACHE_DEFAULT_TIMEOUT = 300
+
 class ProductionConfig(Config):
     PROPAGATE_EXCEPTIONS = False
     TRAP_HTTP_EXCEPTIONS = False

@@ -1,10 +1,16 @@
-from flask import Flask, app, g, jsonify
+from flask import Flask, g, jsonify
+from flask_caching import Cache
 from server.exceptions import DatabaseError
 from server.model.db import DB
 from server.route.admin.admin import admin
 from server.route.borrower.borrower import borrower
 from server.route.librarian.librarian import librarian
 from server.route.common_route import common
+from server.model.seed import seed_db
+from server.util.otp import OTP
+
+otp_cache = Cache(config={"CACHE_TYPE": "SIMPLE_CACHE"})
+otp = OTP()
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
@@ -18,8 +24,8 @@ def create_app():
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
 
-    from .model.seed import seed_db
     seed_db.init_app(app)
+    otp_cache.init_app(app)
 
     app.register_blueprint(admin)
     app.register_blueprint(borrower)

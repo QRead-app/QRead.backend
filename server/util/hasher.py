@@ -1,5 +1,6 @@
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, HashingError
+from flask import Flask
 
 from server.exceptions import DatabaseError, IncorrectCredentialsError
 
@@ -12,6 +13,9 @@ class Hasher:
             memory_cost = 19456,
             parallelism = 1,
         )
+
+    def init_app(self, app: Flask):
+        app.hasher = self
 
     def hash(self, password: str) -> str:
         try:
