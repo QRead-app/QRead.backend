@@ -140,7 +140,7 @@ def forgot_password():
     except RecordNotFoundError:
         return jsonify({"error": "Email not found"}), 404
     except AuthorizationError:
-        return jsonify({"error": "Admin cannot use this service"}), 400
+        return jsonify({"error": "Admin cannot use this service"}), 401
     
     return jsonify({"message": "Reset password email sent"}), 200
 
