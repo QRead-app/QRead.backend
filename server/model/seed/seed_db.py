@@ -4,6 +4,7 @@ import random
 from decimal import Decimal
 from datetime import datetime, timedelta
 
+from server.model.repository.app_settings_repository import AppSettingsRepository
 from server.model.repository.book_return_repository import BookReturnRepository
 from server.util.hasher import Hasher
 from ..db import DB
@@ -43,6 +44,7 @@ def seed_db_command():
         transaction_repo = BookTransactionRepository(session)
         fine_repo = FineRepository(session)
         return_repo = BookReturnRepository(session)
+        settings_repo = AppSettingsRepository(session)
         
         print("Truncating all tables...")
         # Truncate all tables
@@ -51,6 +53,11 @@ def seed_db_command():
         book_repo.truncate_table()
         user_account_repo.truncate_table()
         return_repo.truncate_table()
+        settings_repo.truncate_table()
+
+        print("Seeding app settings...")
+        settings_repo.insert_setting("reminder_x_days_before_due", "7")
+        settings_repo.insert_setting("reminder_every_x_days", "1")
 
         # Seed user accounts
         print("Seeding user accounts...")
