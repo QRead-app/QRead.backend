@@ -1,5 +1,6 @@
 from flask import Blueprint, g, request, session, jsonify
-from server.exceptions import AuthorizationError, ConversionError, IncorrectCredentialsError, RecordNotFoundError
+from server.exceptions import AuthorizationError, ConversionError, EmailAlreadyExistsError, IncorrectCredentialsError, RecordNotFoundError
+from server.model.service.admin.admin_service import AdminService
 from server.model.service.common_service import CommonService
 from server.model.tables import AccountType, Book, User
 
@@ -164,3 +165,31 @@ def reset_password():
         return jsonify({"error": "User does not exist"}), 404
     
     return jsonify({"message": "Password successfully updated"}), 200
+
+@common.route("/new-librarian", methods=["POST"])
+def new_librarian():
+    data = request.json
+    secret = data.get("secret")
+    name = data.get("name")
+    password = data.get("password")
+
+    if secret is None:
+        return jsonify({"error": "Missing secret field"}), 400
+    
+    if name is None:
+        return jsonify({"error": "Missing name field"}), 400
+    
+    if password is None:
+        return jsonify({"error": "Missing password field"}), 400
+    
+    try:
+        AdminService(g.Session).new_librarian(secret, name, password)
+    except EmailAlreadyExistsError as e:
+        return jsonify({"error": f"Email {e} is already registered"}), 400
+    except RecordNotFoundError:
+        return jsonify({"error": "Not authenticated"}), 401
+    except IncorrectCredentialsError:
+        return jsonify({"error": f"Wrong secret {secret}"}), 401 
+
+
+    return jsonify({"message": "Librarian created successfully"}), 200

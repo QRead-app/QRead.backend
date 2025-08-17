@@ -1,4 +1,4 @@
-from server.exceptions import RecordNotFoundError
+from server.exceptions import EmailAlreadyExistsError, RecordNotFoundError
 from server.model.repository.book_transaction_repository import BookTransactionRepository
 from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
@@ -7,9 +7,47 @@ from server.model.tables import AccountState, AccountType, BookTransaction, Fine
 from server.model.repository.user_account_repository import UserAccountRepository
 from sqlalchemy.exc import NoResultFound
 
+from server.util.hasher import hasher
+from server.util.mailer import mailer
+from server.util.otp import otp
+
 class AdminService(BaseService):
     def __init__(self, Session):
         super().__init__(Session)
+
+    @transactional
+    def register_librarian(self, email: str) -> None:
+        user = UserAccountRepository(self.session).get_user(
+            email = email
+        )
+
+        if len(user) > 1:
+            raise EmailAlreadyExistsError()
+        
+        secret = otp.generate_librarian_secret(email)
+        mailer.send_new_librarian(user.email, secret)
+
+    @transactional
+    def new_librarian(
+        self,
+        secret: str,
+        name: str,
+        password: str
+    ) -> User:
+        email = otp.verify_librarian_secret(secret)
+        user = UserAccountRepository(self.session).get_user(
+            email = email
+        )
+
+        if len(user) > 1:
+            raise EmailAlreadyExistsError(email)
+        
+        password = hasher.hash(password)
+
+        user = UserAccountRepository(self.session).insert_user(
+            name, email, password, AccountType.LIBRARIAN)
+
+        return user
 
     @transactional
     def get_users(

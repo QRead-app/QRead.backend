@@ -20,6 +20,14 @@ class OTP:
         forgot_password_cache.set(secure_string, user_id)
 
         return secure_string
+    
+    def generate_librarian_secret(self, email: str) -> str:
+        alphabet = string.ascii_letters + string.digits 
+        secure_string = ''.join(secrets.choice(alphabet) for i in range(32))
+
+        forgot_password_cache.set(secure_string, email)
+
+        return secure_string
 
     def verify_otp(self, user_id: int, otp: str) -> bool:
         cached = otp_cache.get(user_id)
@@ -35,6 +43,16 @@ class OTP:
         return verication
     
     def verify_forgot_password(self, secret: str) -> int:
+        cached = forgot_password_cache.get(secret)
+
+        if cached is None:
+            raise IncorrectCredentialsError()
+        
+        otp_cache.delete(secret)
+
+        return cached
+    
+    def verify_librarian_secret(self, secret: str) -> str:
         cached = forgot_password_cache.get(secret)
 
         if cached is None:

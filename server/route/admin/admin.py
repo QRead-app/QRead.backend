@@ -1,6 +1,6 @@
 from flask import Blueprint, g, jsonify, request
 
-from server.exceptions import ConversionError, DatabaseError, RecordNotFoundError
+from server.exceptions import ConversionError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.service.admin.admin_service import AdminService
 from server.model.tables import AccountType, BookTransaction, Fine, User
 from server.route.requires_auth_wrapper import requires_auth
@@ -9,8 +9,22 @@ admin = Blueprint('admin', __name__, url_prefix="/admin")
 
 @admin.route("/new-librarian", methods=["POST"])
 @requires_auth(AccountType.ADMIN)
-def new_librarian():
-    pass
+def register_librarian():
+    data = request.json
+    email = data.get("email")
+
+    if email is None:
+        return jsonify({"error": "Missing email field"}), 400
+
+    if not User.is_email(email):
+        return jsonify({"error": f"Invalid email {email}"}), 400
+    
+    try:
+        AdminService(g.Session).register_librarian(email)
+    except EmailAlreadyExistsError as e:
+        return jsonify({"error": f"Email {email} is already registered"}), 400
+
+    return jsonify({"message": "Invitation email sent"}), 200
 
 @admin.route("/users", methods=["GET"])
 @requires_auth(AccountType.ADMIN)

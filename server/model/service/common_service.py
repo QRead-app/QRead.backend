@@ -1,6 +1,3 @@
-import string
-import secrets
-
 from server.exceptions import AuthorizationError, DatabaseError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.repository.book_repository import BookRepository
 from server.model.service.base_service import BaseService
@@ -103,7 +100,7 @@ class CommonService(BaseService):
             raise AuthorizationError()
         
         secret = otp.generate_forgot_password_otp(user.id)
-        mailer.send_otp(user.email, secret)
+        mailer.send_forgot_password(user.email, secret)
 
     @transactional
     def reset_password(self, secret: str, password: str) -> None:
