@@ -15,14 +15,59 @@ def new_librarian():
 @admin.route("/users", methods=["GET"])
 @requires_auth(AccountType.ADMIN)
 def get_users():
-    users = AdminService(g.Session).get_users()
+    data = request.args
+    id = data.get("id") 
+    name = data.get("name") 
+    email = data.get("email") 
+    account_type = data.get("type") 
+    account_state = data.get("state")
+
+    if id is not None:
+        try:
+            id = User.str_to_int(id)
+        except ConversionError:
+            return jsonify({"error": f"Invalid id {id}"}), 400
+        
+    if email is not None:
+        try:
+            email = User.is_email(email)
+        except ConversionError:
+            return jsonify({"error": f"Invalid email {email}"}), 400
+        
+    if account_type is not None:
+        try:
+            account_type = User.str_to_account_type(account_type)
+        except ConversionError:
+            return jsonify({"error": f"Invalid account_type {account_type}"}), 400
+        
+    if account_state is not None:
+        try:
+            account_state = User.str_to_account_state(account_state)
+        except ConversionError:
+            return jsonify({"error": f"Invalid account_state {account_state}"}), 400
+
+    try:
+        result = AdminService(g.Session).get_users(
+            id = id,
+            name = name,
+            email = email,
+            account_type = account_type,
+            account_state = account_state
+        )
+    except RecordNotFoundError:
+        return jsonify({
+            "message": "No users found"
+        }), 200
 
     data = []
-    for user in users:
-        data.append(user.to_dict())
-
+    for row in result:
+        data.append((
+            row[0].to_dict(),
+            row[1].to_dict() if row[1] is not None else None,
+            row[2].to_dict() if row[2] is not None else None
+        ))
     for d in data:
-        del d["password"]
+        del d[0]["password"]
 
     return jsonify({
         "message": "Users retreived",

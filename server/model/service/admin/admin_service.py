@@ -1,7 +1,9 @@
 from server.exceptions import RecordNotFoundError
+from server.model.repository.book_transaction_repository import BookTransactionRepository
+from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountState, AccountType, User
+from server.model.tables import AccountState, AccountType, BookTransaction, Fine, User
 from server.model.repository.user_account_repository import UserAccountRepository
 from sqlalchemy.exc import NoResultFound
 
@@ -17,7 +19,9 @@ class AdminService(BaseService):
         email: str = None,
         account_type: AccountType = None,
         account_state: AccountState = None
-    ) -> list[User]:
+    ) -> list[tuple[User, BookTransaction | None, Fine | None]]:
+        result: list[tuple[User, BookTransaction | None, Fine | None]] = []
+
         users = UserAccountRepository(self.session).get_user(
             id=id,
             name=name,
@@ -29,7 +33,22 @@ class AdminService(BaseService):
         if len(users) == 0:
             raise RecordNotFoundError()
         
-        return users
+        for user in users:
+            transaction = BookTransactionRepository(self.session).get_transactions(
+                user_id = user.id
+            )
+
+            fine = FineRepository(self.session).get_fine(
+                user_id = user.id
+            )
+        
+            result.append(
+                user,
+                transaction if len(transaction) != 0 else None, 
+                fine if len(fine) != 0 else None, 
+            )
+
+        return result
 
     @transactional
     def suspend_user(self, user: User) -> User:
