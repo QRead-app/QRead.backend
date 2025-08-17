@@ -1,6 +1,7 @@
 from flask import Flask, g, jsonify
 from flask_cors import CORS
-from server.util.extensions import otp_cache, mailer, forgot_password_cache, new_librarian_cache
+from server.model.service.notification_service import due_date_reminder
+from server.util.extensions import otp_cache, mailer, forgot_password_cache, new_librarian_cache, scheduler
 from server.exceptions import DatabaseError
 from server.model.db import DB
 from server.route.admin.admin import admin
@@ -8,6 +9,9 @@ from server.route.borrower.borrower import borrower
 from server.route.librarian.librarian import librarian
 from server.route.common_route import common
 from server.model.seed import seed_db
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.triggers.cron import CronTrigger
+
 
 def create_app(env: str = None):
     app = Flask(__name__, instance_relative_config=True)
@@ -48,6 +52,20 @@ def create_app(env: str = None):
         DatabaseError,
         handle_database_error
     )
+
+    scheduler.configure(
+        jobstores = {
+            "default": SQLAlchemyJobStore(
+                engine = db.get_engine()
+            )
+        }
+    )
+    scheduler.add_job(
+        due_date_reminder,
+        id = "due_date_reminder",
+        trigger = CronTrigger.from_crontab("0 16 * * *")
+    )
+    scheduler.start()
 
     return app
 

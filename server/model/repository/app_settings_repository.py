@@ -3,7 +3,7 @@ from .base_repository import BaseRepository
 from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
 
-class BookRepository(BaseRepository):
+class AppSettingsRepository(BaseRepository):
     def __init__(self, session: Session):
         super().__init__(session)
     

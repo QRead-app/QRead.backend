@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
 class DB:
@@ -8,3 +8,6 @@ class DB:
 
     def get_sessionmaker(self) -> sessionmaker:
         return self.session
+    
+    def get_engine(self) -> Engine:
+        return self.engine
