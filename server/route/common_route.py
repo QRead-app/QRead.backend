@@ -29,6 +29,8 @@ def login(type: str):
         user = CommonService(g.Session).authenticate(email, password, account_type)
     except IncorrectCredentialsError:
         return jsonify({"error": "Authentication failed"}), 401
+    except AuthorizationError:
+        return jsonify({"error": "User is suspended"}), 400
     
     session["authenticate"] = {"id": user.id, "account_type": account_type.name}
 

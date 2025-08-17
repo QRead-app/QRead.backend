@@ -5,7 +5,7 @@ from server.exceptions import AuthorizationError, DatabaseError, IncorrectCreden
 from server.model.repository.book_repository import BookRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountType, Book, BookCondition, User
+from server.model.tables import AccountState, AccountType, Book, BookCondition, User
 from server.model.repository.user_account_repository import UserAccountRepository
 from server.util.mailer import mailer
 from server.util.otp import otp
@@ -37,6 +37,9 @@ class CommonService(BaseService):
             user[0].password = hasher.hash(password)
         
         user = user[0]
+
+        if user.account_state == AccountState.SUSPENDED:
+            raise AuthorizationError()
 
         onetimepass = otp.generate_otp(user.id)
         mailer.send_otp(user.email, onetimepass)
