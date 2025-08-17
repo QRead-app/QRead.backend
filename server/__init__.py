@@ -9,9 +9,12 @@ from server.route.librarian.librarian import librarian
 from server.route.common_route import common
 from server.model.seed import seed_db
 
-def create_app():
+def create_app(env: str = None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py', silent=False)
+
+    if env is not None:
+        app.config["ENVIRONMENT"] = env
 
     if app.config["ENVIRONMENT"] == 'development':
         app.config.from_object('server.config.DevelopmentConfig')
@@ -22,7 +25,7 @@ def create_app():
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
         CORS(app)
-
+        
     seed_db.init_app(app)
     otp_cache.init_app(app)
     mailer.init_app(app)
@@ -44,15 +47,7 @@ def create_app():
         handle_database_error
     )
 
-    app.register_error_handler(
-        Exception,
-        handle_all_error
-    )
-
     return app
 
 def handle_database_error(e):
-    return jsonify({"error": "Internal server error"}), 500
-
-def handle_all_error(e):
     return jsonify({"error": "Internal server error"}), 500
