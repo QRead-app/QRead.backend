@@ -114,17 +114,16 @@ def get_fines():
     except RecordNotFoundError:
         return jsonify({"message": "No fines found"}), 200
     
-    fines_dict = []
+    data = []
     for n in range(len(fines)):
-        fine_dict = fines[n].to_dict()
-        book_dict = books[n].to_dict()
-
-        fine_dict["book"] = book_dict
-        fines_dict.append(fine_dict)
+        data.append({
+            "fine": fines[n].to_dict(),
+            "book": books[n].to_dict()
+        })
         
     return jsonify({
         "message": "Fine(s) retrieved",
-        "data": fine_dict
+        "data": data
     }), 200
 
 @borrower.route("/pay-fine", methods=["POST"])
