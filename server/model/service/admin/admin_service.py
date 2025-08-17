@@ -69,3 +69,7 @@ class AdminService(BaseService):
         user.account_state = AccountState.ACTIVE
 
         return user
+    
+    @transactional
+    def delete_user(self, user: User) -> None:
+        UserAccountRepository(self.session).delete_user(user)

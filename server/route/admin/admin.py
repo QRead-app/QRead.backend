@@ -136,3 +136,26 @@ def reinstate_user():
     AdminService(g.Session).reinstate_user(user)
 
     return jsonify({"message": f"User reinstated succesfully"}), 200
+
+@admin.route("/user", methods=["DELETE"])
+@requires_auth(AccountType.ADMIN)
+def reinstate_user():
+    data = request.args
+    user_id = data.get("id")
+
+    if user_id is None:
+        return jsonify({"error": f"Missing id field"})
+
+    try:
+        user_id = User.str_to_int(user_id)
+    except ConversionError as e:
+        return jsonify({"error": f"Invalid id {user_id}"}), 400
+
+    try:
+        user = AdminService(g.Session).get_users(id=user_id)
+    except RecordNotFoundError:
+        return jsonify({"error": f"User id {user_id} not found"}), 404
+    
+    AdminService(g.Session).delete_user(user[0])
+
+    return jsonify({"message": f"User deleted succesfully"}), 200
