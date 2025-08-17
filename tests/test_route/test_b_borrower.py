@@ -61,7 +61,8 @@ def test_borrow_bad_unauthorized(client):
     ({"book_ids": ["1"]}, "Book id 1 not found", 400),
     ({"book_ids": ["2", "1"]}, "Book id 2 not found", 400)
 ))
-def test_borrow_bad(borrower_client, books, message, code):
+def test_borrow_bad(client_factory, books, message, code):
+    borrower_client = client_factory("borrower")
     response = borrower_client.post(
         "/borrower/borrow",
         json = books
@@ -70,7 +71,8 @@ def test_borrow_bad(borrower_client, books, message, code):
     assert response.json.get("error") == message
     assert response.status_code == code
 
-def test_borrow_good(borrower_client):
+def test_borrow_good(client_factory):
+    borrower_client = client_factory("borrower")
     response = borrower_client.post(
         "/borrower/borrow",
         json = {
@@ -81,7 +83,8 @@ def test_borrow_good(borrower_client):
     assert response.json.get("message") == "Book(s) borrowed successfully"
     assert response.status_code == 200
 
-def test_borrow_bad_borrowed(borrower_client):
+def test_borrow_bad_borrowed(client_factory):
+    borrower_client = client_factory("borrower")
     response = borrower_client.post(
         "/borrower/borrow",
         json = {
@@ -104,15 +107,17 @@ def test_get_borrowed_bad_unauthorized(client):
     assert response.json.get("error") == "Unauthorized"
     assert response.status_code == 401
 
-def test_get_borrowed_bad_no_borrowed(borrower_2_client):
-    response = borrower_2_client.get(
+def test_get_borrowed_bad_no_borrowed(client_factory):
+    borrower_client = client_factory("borrower2")
+    response = borrower_client.get(
         "/borrower/borrowed-books"
     )
 
     assert response.json.get("message") == "No books found"
     assert response.status_code == 200
 
-def test_get_borrowed_good(borrower_client):
+def test_get_borrowed_good(client_factory):
+    borrower_client = client_factory("borrower")
     response = borrower_client.get(
         "/borrower/borrowed-books"
     )

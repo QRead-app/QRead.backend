@@ -18,43 +18,45 @@ def client(app):
     return app.test_client()
 
 @pytest.fixture
-def borrower_client(app, type: str):
-    if type == "borrower":
-        email = test_borrower.email
-        password = test_borrower.password
-    elif type == "admin":
-        email = test_admin.email
-        password = test_admin.password
-    elif type == "librarian":
-        email = test_librarian.email
-        password = test_librarian.password
-    elif type == "borrower2":
-        email = test_borrower_2.email
-        password = test_borrower_2.password
-        type = "borrower"
-    else:
-        raise Exception("Invalid client type")
+def client_factory(app):
+    def _get_client(type: str):
+        if type == "borrower":
+            email = test_borrower.email
+            password = test_borrower.password
+        elif type == "admin":
+            email = test_admin.email
+            password = test_admin.password
+        elif type == "librarian":
+            email = test_librarian.email
+            password = test_librarian.password
+        elif type == "borrower2":
+            email = test_borrower_2.email
+            password = test_borrower_2.password
+            type = "borrower"
+        else:
+            raise Exception("Invalid client type")
 
-    client = app.test_client()
+        client = app.test_client()
 
-    with mailer.record_messages() as outbox:
+        with mailer.record_messages() as outbox:
+            client.post(
+                f"/{type}/login",
+                json = {
+                    "email": email,
+                    "password": password
+                }
+            )
+            otp = outbox[0].body[-6:]
+        
         client.post(
-            f"/{type}/login",
+            "/verify-otp",
             json = {
-                "email": email,
-                "password": password
+                "otp": otp
             }
         )
-        otp = outbox[0].body[-6:]
-    
-    client.post(
-        "/verify-otp",
-        json = {
-            "otp": otp
-        }
-    )
-    
-    return client
+        
+        return client
+    return _get_client
 
 @pytest.fixture(scope="session")
 def runner(app):
