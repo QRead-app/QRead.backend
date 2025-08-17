@@ -44,7 +44,15 @@ def create_app():
         handle_database_error
     )
 
+    app.register_error_handler(
+        Exception,
+        handle_all_error
+    )
+
     return app
 
 def handle_database_error(e):
+    return jsonify({"error": "Internal server error"}), 500
+
+def handle_all_error(e):
     return jsonify({"error": "Internal server error"}), 500
