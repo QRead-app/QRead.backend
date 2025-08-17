@@ -202,5 +202,5 @@ class BookReturn(Base):
 class AppSettings(Base):
     __tablename__ = "app_settings"
 
-    key: Mapped[str]
+    key: Mapped[str] = mapped_column(primary_key=True)
     value: Mapped[str]

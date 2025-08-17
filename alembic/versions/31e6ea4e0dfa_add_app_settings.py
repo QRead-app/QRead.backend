@@ -22,8 +22,9 @@ def upgrade() -> None:
     """Upgrade schema."""
     op.create_table(
         "app_settings",
-        sa.Column('key', sa.String(), nullable=False),
-        sa.Column('value', sa.String(), nullable=False)        
+        sa.Column('key', sa.String(), nullable=False, primary_key=True),
+        sa.Column('value', sa.String(), nullable=False),
+        sa.PrimaryKeyConstraint('key')   
     )
 
 
