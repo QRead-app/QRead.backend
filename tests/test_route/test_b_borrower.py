@@ -185,3 +185,61 @@ def test_fines_good(client_factory):
     assert res.json.get("message") == "Fine(s) retrieved"
     assert res.status_code == 200
     assert "data" in res.json
+
+    current_app.config["fine_id"] = res.json.get("data")[0]["fine"]["id"]
+
+### ==========================
+### Borrower - /pay-fine
+### ==========================
+
+def test_pay_fine_bad_missing_id(client_factory):
+    client = client_factory("borrower")
+
+    res = client.post(
+        "/borrower/pay-fine",
+        json = {
+            "fine_id": None
+        }
+    )
+
+    assert res.json.get("error") == "Missing fine_id field"
+    assert res.status_code == 400
+
+def test_pay_fine_invalid_fine_id(client_factory):
+    client = client_factory("borrower")
+
+    res = client.post(
+        "/borrower/pay-fine",
+        json = {
+            "fine_id": "hi"
+        }
+    )
+
+    assert res.json.get("error") == "Invalid fine id hi"
+    assert res.status_code == 400
+
+def test_pay_fine_bad_not_found(client_factory):
+    client = client_factory("borrower")
+
+    res = client.post(
+        "/borrower/pay-fine",
+        json = {
+            "fine_id": 0
+        }
+    )
+
+    assert res.json.get("error") == "Fine id 0 not found"
+    assert res.status_code == 404
+
+def test_pay_fine_good(client_factory):
+    client = client_factory("borrower")
+
+    res = client.post(
+        "/borrower/pay-fine",
+        json = {
+            "fine_id": current_app.config["fine_id"]
+        }
+    )
+
+    assert res.json.get("message") == "Fine paid successfully"
+    assert res.status_code == 200
