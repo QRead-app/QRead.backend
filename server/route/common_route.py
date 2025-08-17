@@ -43,7 +43,12 @@ def login(type: str):
 @common.route("/verify-otp", methods = ["POST"])
 def verify_otp():
     data = request.json
-    user_id = session.get("authenticate").get("id")
+    sess = session.get("authenticate")
+
+    if sess is None:
+        return jsonify({"error": "Not authenticated"}), 401
+
+    user_id = sess.get("id")
     onetimepass = data.get("otp")
 
     if user_id is None:
