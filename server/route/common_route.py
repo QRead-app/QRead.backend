@@ -159,7 +159,7 @@ def reset_password():
     try:
         CommonService(g.Session).reset_password(secret)
     except IncorrectCredentialsError:
-        return jsonify({"error": f"Invalid secret {secret}"}), 400
+        return jsonify({"error": f"Wrong secret {secret}"}), 401
     except RecordNotFoundError:
         return jsonify({"error": "User does not exist"}), 404
     
