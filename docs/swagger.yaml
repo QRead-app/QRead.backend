@@ -210,6 +210,9 @@ paths:
                 Invalid email:
                   value:
                     error: Invalid email test@email.com
+                User suspended:
+                  value:
+                    error: User is suspended
         "401":
           description: Authentication error
           content:
