@@ -7,7 +7,7 @@ from server.route.requires_auth_wrapper import requires_auth
 
 admin = Blueprint('admin', __name__, url_prefix="/admin")
 
-@admin.route("/new-librarian", methods=["POST"])
+@admin.route("/register-librarian", methods=["POST"])
 @requires_auth(AccountType.ADMIN)
 def register_librarian():
     data = request.json
