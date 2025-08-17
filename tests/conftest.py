@@ -1,11 +1,9 @@
 import pytest
 
-from flask import g 
+from flask import current_app, g 
 from server.model.db import DB
 from server.model.repository.book_repository import BookRepository
-from server.model.repository.book_transaction_repository import BookTransactionRepository
-from server.model.repository.fine_repository import FineRepository
-from server.model.tables import AccountType
+from server.util.extensions import otp_cache, mailer
 from server.util.hasher import Hasher
 from tests.test_data import *
 from server import create_app
@@ -13,62 +11,49 @@ from server.model.repository.user_account_repository import UserAccountRepositor
 
 @pytest.fixture(scope="session")
 def app():
-    return create_app()
+    return create_app("testing")
 
 @pytest.fixture
 def client(app):
     return app.test_client()
 
 @pytest.fixture
-def borrower_client(app):
+def borrower_client(app, type: str):
+    if type == "borrower":
+        email = test_borrower.email
+        password = test_borrower.password
+    elif type == "admin":
+        email = test_admin.email
+        password = test_admin.password
+    elif type == "librarian":
+        email = test_librarian.email
+        password = test_librarian.password
+    elif type == "borrower2":
+        email = test_borrower_2.email
+        password = test_borrower_2.password
+        type = "borrower"
+    else:
+        raise Exception("Invalid client type")
+
     client = app.test_client()
+
+    with mailer.record_messages() as outbox:
+        client.post(
+            f"/{type}/login",
+            json = {
+                "email": email,
+                "password": password
+            }
+        )
+        otp = outbox[0].body[-6:]
+    
     client.post(
-        "/borrower/login",
+        "/verify-otp",
         json = {
-            "email": test_borrower.email,
-            "password": test_borrower.password
+            "otp": otp
         }
     )
     
-    return client
-
-@pytest.fixture
-def borrower_2_client(app):
-    client = app.test_client()
-    client.post(
-        "/borrower/login",
-        json = {
-            "email": test_borrower_2.email,
-            "password": test_borrower_2.password
-        }
-    )
-    
-    return client
-
-@pytest.fixture
-def admin_client(app):
-    client = app.test_client()
-    client.post(
-        "/admin/login",
-        json = {
-            "email": test_admin.email,
-            "password": test_admin.password
-        }
-    )
-
-    return client
-
-@pytest.fixture
-def librarian_client(app):
-    client = app.test_client()
-    client.post(
-        "/librarian/login",
-        json = {
-            "email": test_librarian.email,
-            "password": test_librarian.password
-        }
-    )
-
     return client
 
 @pytest.fixture(scope="session")
