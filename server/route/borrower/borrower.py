@@ -85,17 +85,18 @@ def get_borrow_history():
             session["session"]["id"]
         )
     except RecordNotFoundError as e:
-        if e:
-            raise DatabaseError()
-        return jsonify({"message": "No borrow history"}), 200
+        if e.args[0].get("type") == "transaction_history":
+            return jsonify({"message": "No borrow history"}), 200
+        else:
+            raise DatabaseError(e)
     
     return jsonify({
         "message": "Book history retrieved",
         "data": [
             {
                 "book": book.to_dict(),
-                "transaction:": transaction.to_dict(),
-                "return": book_return.to_dict()
+                "transaction": transaction.to_dict(),
+                "return": book_return.to_dict() if book_return is not None else None
             }
             for book, transaction, book_return in history
         ]

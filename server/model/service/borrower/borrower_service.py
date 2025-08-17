@@ -90,7 +90,7 @@ class BorrowerService(BaseService):
         return result
     
     @transactional
-    def get_borrow_history(self, user_id: int) -> list[tuple[Book, BookTransaction, BookReturn]]:
+    def get_borrow_history(self, user_id: int) -> list[tuple[Book, BookTransaction, BookReturn | None]]:
         transaction_repo = BookTransactionRepository(self.session)
         book_repo = BookRepository(self.session)
         return_repo = BookReturnRepository(self.session)
@@ -118,18 +118,21 @@ class BorrowerService(BaseService):
             if len(book) > 1:
                 raise DatabaseError()
             
-            return_record = return_repo.get_book_return(
-                book_transaction_id = transaction.id
-            )
+            return_record = None
 
-            if len(return_record) == 0:
-                raise RecordNotFoundError({
-                "type": "return",
-                "data": transaction.id
-            })
-            
-            if len(book) > 1:
-                raise DatabaseError()
+            if transaction.returned == True:
+                return_record = return_repo.get_book_return(
+                    book_transaction_id = transaction.id
+                )
+
+                if len(return_record) == 0:
+                    raise RecordNotFoundError({
+                    "type": "return",
+                    "data": transaction.id
+                })
+                
+                if len(book) > 1:
+                    raise DatabaseError()
             
             result.append((book[0], transaction, return_record))
 

@@ -4,9 +4,9 @@ from flask import current_app, g
 from tests.test_data import *
 
 
-"""
-    Borrower - /register
-"""
+### ==========================
+### Borrower - /register
+### ==========================
 
 @pytest.mark.parametrize(('name', 'email', 'password', 'message', "code"), (
     (None, 'testtest@test.com', "Admin", "Missing name field", 400),
@@ -41,9 +41,9 @@ def test_register_good(client):
     assert response.json.get("message") == "Registered"
     assert response.status_code == 200
 
-"""
-    Borrower - /borrow
-"""
+### ==========================
+### Borrower - /borrow
+### ==========================
 
 def test_borrow_bad_unauthorized(client):
     response = client.post(
@@ -95,9 +95,9 @@ def test_borrow_bad_borrowed(client_factory):
     assert response.json.get("error") == f"Book id {current_app.config['test_book']['id']} has already been borrowed"
     assert response.status_code == 400
 
-"""
-    Borrower - /get-borrowed-books
-"""
+### ==========================
+### Borrower - /borrowed-books
+### ==========================
 
 def test_get_borrowed_bad_unauthorized(client):
     response = client.get(
@@ -124,4 +124,30 @@ def test_get_borrowed_good(client_factory):
     
     assert response.json.get("message") == "Borrowed book(s) retrieved"
     assert response.status_code == 200
-    assert response.json.get("data")[0]["id"]== current_app.config["test_book"]["id"]
+    assert response.json.get("data")[0]["book"]["id"] == current_app.config["test_book"]["id"]
+
+### ==========================
+### Borrower - /borrow-history
+### ==========================
+
+def test_borrow_history_good_no_history(client_factory):
+    borrower_client = client_factory("borrower2")
+    response = borrower_client.get(
+        "/borrower/borrow-history"
+    )
+    
+    assert response.json.get("message") == "No borrow history"
+    assert response.status_code == 200
+    
+
+def test_borrow_history_good(client_factory):
+    borrower_client = client_factory("borrower")
+    response = borrower_client.get(
+        "/borrower/borrow-history"
+    )
+    
+    assert response.json.get("message") == "Book history retrieved"
+    assert response.status_code == 200
+    assert response.json.get("data")[0]["book"]["id"]== current_app.config["test_book"]["id"]
+    assert "transaction" in response.json.get("data")[0]
+    assert "return" in response.json.get("data")[0]
