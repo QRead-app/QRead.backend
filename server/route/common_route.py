@@ -30,8 +30,6 @@ def login(type: str):
     except IncorrectCredentialsError:
         return jsonify({"error": "Authentication failed"}), 401
     
-    
-
     session["authenticate"] = {"id": user.id, "account_type": account_type.name}
 
     return jsonify({
@@ -56,7 +54,7 @@ def verify_otp():
         return jsonify({"error": "Missing otp field"}), 400
 
     try:
-        verification = otp.verify_otp(user_id, onetimepass)
+        verification = CommonService(g.Session).verify_otp(user_id, onetimepass)
     except RecordNotFoundError:
         return jsonify({"error": "Not authenticated"}), 401
     

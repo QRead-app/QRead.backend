@@ -36,10 +36,15 @@ class CommonService(BaseService):
         if hasher.need_rehash(user[0].password):
             user[0].password = hasher.hash(password)
         
+        user = user[0]
+
         onetimepass = otp.generate_otp(user.id)
         mailer.send_otp(user.email, onetimepass)
 
-        return user[0]
+        return user
+    
+    def verify_otp(self, id:str, onetimepass: str) -> bool:
+        return otp.verify_otp(id, onetimepass)
 
     @transactional
     def verify(self, id: str, account_type: AccountType) -> bool:
