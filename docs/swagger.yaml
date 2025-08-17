@@ -1456,11 +1456,46 @@ paths:
 
   /admin/users:
     get:
-      summary: Retrieve all users
+      summary: Retrieve users by search
       tags:
         - Admin
       security:
         - qread.backend_auth: []
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: integer
+          required: false
+          description: User's id
+        - in: query
+          name: name
+          schema:
+            type: string
+          required: false
+          description: User's name
+        - in: query
+          name: email
+          schema:
+            type: string
+          required: false
+          description: User's email
+        - in: query
+          name: type
+          schema:
+            type: string
+            format: enum
+            enum: ["ADMIN", "LIBRARIAN", "BORROWER"]
+          required: false
+          description: User's account type
+        - in: query
+          name: state
+          schema:
+            type: string
+            format: enum
+            enum: ["ACTIVE", "SUSPENDED"]
+          required: false
+          description: User's account state
       responses:
         "200":
           description: Successful operation
@@ -1532,6 +1567,68 @@ paths:
                   error:
                     type: string
                     example: "Unauthorized"
+  /admin/user:
+    delete:
+      summary: Delete a user
+      tags:
+        - Admin
+      security:
+        - qread.backend_auth: []
+      parameters:
+        - in: query
+          name: id
+          schema:
+            type: string
+          required: true
+          description: The user's id to be deleted
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User deleted successfully"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing id field
+              examples:
+                Missing id:
+                  value:
+                    error: Missing id field
+                Invalid id:
+                  value:
+                    error: Invalid id 49
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: User id not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User id 48 not found
   /admin/suspend-user:
     post:
       summary: Suspend a user
@@ -1576,7 +1673,7 @@ paths:
                     error: Missing id field
                 Invalid id:
                   value:
-                    error: Invalid if 49
+                    error: Invalid id 49
         "401":
           description: Authentication error
           content:
@@ -1641,7 +1738,7 @@ paths:
                     error: Missing id field
                 Invalid id:
                   value:
-                    error: Invalid if 49
+                    error: Invalid id 49
         "401":
           description: Authentication error
           content:
