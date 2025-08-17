@@ -1,9 +1,14 @@
-from server.exceptions import DatabaseError, IncorrectCredentialsError, RecordNotFoundError
+import string
+import secrets
+
+from server.exceptions import AuthorizationError, DatabaseError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.repository.book_repository import BookRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
 from server.model.tables import AccountType, Book, BookCondition, User
 from server.model.repository.user_account_repository import UserAccountRepository
+from server.util.mailer import mailer
+from server.util.otp import otp
 from server.util.hasher import hasher
 
 class CommonService(BaseService):
@@ -31,6 +36,9 @@ class CommonService(BaseService):
         if hasher.need_rehash(user[0].password):
             user[0].password = hasher.hash(password)
         
+        onetimepass = otp.generate_otp(user.id)
+        mailer.send_otp(user.email, onetimepass)
+
         return user[0]
 
     @transactional
@@ -68,3 +76,39 @@ class CommonService(BaseService):
             raise RecordNotFoundError()
 
         return books
+    
+    @transactional
+    def forgot_password(self, email: str) -> None:
+        user = UserAccountRepository(self.session).get_user(
+            email = email
+        )
+
+        if len(user) == 0:
+            raise RecordNotFoundError()
+        
+        if len(user) > 1:
+            raise DatabaseError()
+        
+        user = user[0]
+
+        if user.account_type == AccountType.ADMIN:
+            raise AuthorizationError()
+        
+        secret = otp.generate_forgot_password_otp(user.id)
+        mailer.send_otp(user.email, secret)
+
+    @transactional
+    def reset_password(self, secret: str, password: str) -> None:
+        id = otp.verify_forgot_password(secret)
+
+        user = UserAccountRepository(self.session).get_user(
+            id = id
+        )
+
+        if len(user) == 0:
+            raise RecordNotFoundError()
+        
+        if len(user) > 1:
+            raise DatabaseError()
+        
+        user[0].password = hasher.hash(password)

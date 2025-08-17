@@ -1,6 +1,9 @@
 class ServiceError(Exception):
     pass
 
+class AuthorizationError(ServiceError):
+    pass
+
 class EmailAlreadyExistsError(ServiceError):
     pass
 

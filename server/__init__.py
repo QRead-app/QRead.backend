@@ -1,6 +1,6 @@
 from flask import Flask, g, jsonify
 from flask_cors import CORS
-from server.util.extensions import otp_cache, mailer
+from server.util.extensions import otp_cache, mailer, forgot_password_cache
 from server.exceptions import DatabaseError
 from server.model.db import DB
 from server.route.admin.admin import admin
@@ -28,6 +28,7 @@ def create_app(env: str = None):
         
     seed_db.init_app(app)
     otp_cache.init_app(app)
+    forgot_password_cache.init_app(app)
     mailer.init_app(app)
 
     app.register_blueprint(admin)

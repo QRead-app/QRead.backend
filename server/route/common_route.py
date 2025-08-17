@@ -1,9 +1,8 @@
 from flask import Blueprint, g, request, session, jsonify
-from server.exceptions import ConversionError, IncorrectCredentialsError, RecordNotFoundError
+from server.exceptions import AuthorizationError, ConversionError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.service.common_service import CommonService
 from server.model.tables import AccountType, Book, User
-from server.util.mailer import mailer
-from server.util.otp import otp
+
 
 common = Blueprint('common', __name__)
 
@@ -31,8 +30,7 @@ def login(type: str):
     except IncorrectCredentialsError:
         return jsonify({"error": "Authentication failed"}), 401
     
-    onetimepass = otp.generate_otp(user.id)
-    mailer.send_otp(user.email, onetimepass)
+    
 
     session["authenticate"] = {"id": user.id, "account_type": account_type.name}
 
@@ -125,3 +123,44 @@ def get_book():
         "message": "Book(s) retrieved",
         "data": books
     }), 200
+
+@common.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    data = request.json
+    email = data.get("email")
+
+    if email is None:
+        return jsonify({"error": "Missing email field"}), 400
+    
+    if not User.is_email(email):
+        return jsonify({"error": f"Invalid email {email}"}), 400
+    
+    try:
+        CommonService(g.Session).forgot_password(email)
+    except RecordNotFoundError:
+        return jsonify({"error": "Email not found"}), 404
+    except AuthorizationError:
+        return jsonify({"error": "Admin cannot use this service"}), 400
+    
+    return jsonify({"message": "Reset password secret sent"}), 200
+
+@common.route("/reset-password", methods=["POST"])
+def reset_password():
+    data = request.json
+    secret = data.get("secret")
+    password = data.get("password")
+
+    if secret is None:
+        return jsonify({"error": "Missing secret field"}), 400
+    
+    if password is None:
+        return jsonify({"error": "Missing password field"})
+    
+    try:
+        CommonService(g.Session).reset_password(secret)
+    except IncorrectCredentialsError:
+        return jsonify({"error": f"Invalid secret {secret}"}), 400
+    except RecordNotFoundError:
+        return jsonify({"error": "User does not exist"}), 404
+    
+    return jsonify({"message": "Password successfully updated"}), 200

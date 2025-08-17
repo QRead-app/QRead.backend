@@ -18,5 +18,18 @@ class Mailer:
         )
 
         mail.send(msg)
+
+    def send_forgot_password(self, to: str, secret: int) -> None:
+        if not User.is_email(to):
+            raise ValueError()
+        
+        msg = Message(
+            subject = "QRead OTP",
+            sender = "noreply@QRead.com",
+            recipients = [to],
+            body = f"Your reset password secret is {secret}"
+        )
+
+        mail.send(msg)
         
 mailer = Mailer()
