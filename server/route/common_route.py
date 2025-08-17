@@ -142,7 +142,7 @@ def forgot_password():
     except AuthorizationError:
         return jsonify({"error": "Admin cannot use this service"}), 400
     
-    return jsonify({"message": "Reset password secret sent"}), 200
+    return jsonify({"message": "Reset password email sent"}), 200
 
 @common.route("/reset-password", methods=["POST"])
 def reset_password():
