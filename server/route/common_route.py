@@ -154,7 +154,7 @@ def reset_password():
         return jsonify({"error": "Missing secret field"}), 400
     
     if password is None:
-        return jsonify({"error": "Missing password field"})
+        return jsonify({"error": "Missing password field"}), 400
     
     try:
         CommonService(g.Session).reset_password(secret)
