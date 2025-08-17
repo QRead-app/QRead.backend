@@ -1453,6 +1453,78 @@ paths:
                   error:
                     type: string
                     example: Book id 49 not found
+  /new-librarian:
+    post:
+      summary: Create a new librarian account
+      tags:
+        - Librarian
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                secret:
+                  type: string
+                  example: a83nfjgh49alsken4b2hf84jvka1248fb
+                name:
+                  type: string
+                  example: test_librarian
+                password:
+                  type: string
+                  example: examplePassword123
+      security: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Librarian created successfully"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing email field
+              examples:
+                Missing secret:
+                  value:
+                    error: Missing secret field
+                Missing name:
+                  value:
+                    error: Missing name field
+                Missing password:
+                  value:
+                    error: Missing password field
+                Email already registered:
+                  value:
+                    error: Email test@test.com is already registered
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Wrong secret a83nfjgh49alsken4b2hf84jvka1248fb
+              examples:
+                Wrong secret:
+                  value:
+                    error: Wrong secret a83nfjgh49alsken4b2hf84jvka1248fb
+                Not authenticated:
+                  value:
+                    error: Not authenticated
 
   /admin/users:
     get:
@@ -1759,6 +1831,64 @@ paths:
                   error:
                     type: string
                     example: User id 48 not found
+  /admin/register-librarian:
+    post:
+      summary: Register a new librarian
+      description: An email will be sent to the librarian which should be followed by an API call to /new-librarian
+      tags:
+        - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: test@email.com
+      security:
+        - qread.backend_auth: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invitation email sent"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing email field
+              examples:
+                Missing email:
+                  value:
+                    error: Missing email field
+                Invalid email:
+                  value:
+                    error: Invalid email test.com
+                Email already exist:
+                  value:
+                    error: Email already exist
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
 
 components:
   securitySchemes:
