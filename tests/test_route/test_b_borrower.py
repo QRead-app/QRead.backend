@@ -151,3 +151,37 @@ def test_borrow_history_good(client_factory):
     assert response.json.get("data")[0]["book"]["id"]== current_app.config["test_book"]["id"]
     assert "transaction" in response.json.get("data")[0]
     assert "return" in response.json.get("data")[0]
+
+### ==========================
+### Borrower - /fines
+### ==========================
+
+def test_fines_bad_no_fines(client_factory):
+    client = client_factory("borrower")
+    res = client.get("/borrower/fines")
+
+    assert res.json.get("message") == "No fines found"
+    assert res.status_code == 200
+
+def test_fines_good(client_factory):
+    librarian_client = client_factory("librarian")
+    borrower_client = client_factory("borrower")
+    admin_client = client_factory("admin")
+
+    res = admin_client.get(
+        f"/admin/users?name={test_borrower.name}"
+    )
+    librarian_client.post(
+        f"/librarian/fine",
+        json = {
+            "user_id": res.json.get("data")[0]["user"]["id"],
+            "transaction_id": res.json.get("data")[0]["transaction"][0]["id"],
+            "amount": "25.00",
+            "reason": "test"
+        }
+    )
+    res = borrower_client.get("/borrower/fines")
+
+    assert res.json.get("message") == "Fine(s) retrieved"
+    assert res.status_code == 200
+    assert "data" in res.json

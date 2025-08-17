@@ -155,14 +155,14 @@ class BorrowerService(BaseService):
         for fine in fines:
             transaction = transaction_repo.get_transactions(
                 id = fine.transaction_id)
-            transactions.append(transaction)
+            transactions.append(transaction[0])
 
         books: list[Book] = []
         for transaction in transactions:
             book = book_repo.get_book(
                 id = transaction.book_id
             )
-            books.append(book)
+            books.append(book[0])
         
         return fines, books
     

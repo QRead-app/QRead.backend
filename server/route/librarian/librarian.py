@@ -41,7 +41,7 @@ def issue_fine():
     except ConversionError as e:
         return jsonify({"error": f"Invalid amount {amount}"}), 400
     
-    LibrarianService(g.Session).issue_fine(user_id, amount, reason)
+    LibrarianService(g.Session).issue_fine(user_id, transaction_id, amount, reason)
     
     return jsonify({"message": "Fine issued successfully"}), 200
 

@@ -2,7 +2,7 @@ from flask import Blueprint, g, jsonify, request
 
 from server.exceptions import ConversionError, DatabaseError, RecordNotFoundError
 from server.model.service.admin.admin_service import AdminService
-from server.model.tables import AccountType, User
+from server.model.tables import AccountType, BookTransaction, Fine, User
 from server.route.requires_auth_wrapper import requires_auth
 
 admin = Blueprint('admin', __name__, url_prefix="/admin")
@@ -61,13 +61,30 @@ def get_users():
 
     data = []
     for row in result:
-        data.append((
-            row[0].to_dict(),
-            row[1].to_dict() if row[1] is not None else None,
-            row[2].to_dict() if row[2] is not None else None
-        ))
-    for d in data:
-        del d[0]["password"]
+        transactions: list[BookTransaction | None] | None = []
+        if row[1] is not None:
+            for transaction in row[1]:
+                transactions.append(
+                    transaction.to_dict() if transaction is not None else None)
+        else:
+            transactions = None
+
+        fines: list[Fine | None] | None = []
+        if row[2] is not None:
+            for fine in row[2]:
+                fines.append(
+                    fine.to_dict() if fine is not None else None)
+        else:
+            fines = None
+
+        users = row[0].to_dict()
+        del users["password"]
+
+        data.append({
+            "user": users,
+            "transaction": transactions,
+            "fine": fines
+        })
 
     return jsonify({
         "message": "Users retreived",

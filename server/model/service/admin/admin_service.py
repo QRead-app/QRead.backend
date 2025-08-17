@@ -19,8 +19,16 @@ class AdminService(BaseService):
         email: str = None,
         account_type: AccountType = None,
         account_state: AccountState = None
-    ) -> list[tuple[User, BookTransaction | None, Fine | None]]:
-        result: list[tuple[User, BookTransaction | None, Fine | None]] = []
+    ) -> list[tuple[
+            User, 
+            list[BookTransaction | None] | None, 
+            list[Fine | None] | None]
+        ]:
+        result: list[tuple[
+            User, 
+            list[BookTransaction | None] | None, 
+            list[Fine | None] | None]
+        ] = []
 
         users = UserAccountRepository(self.session).get_user(
             id=id,
@@ -42,11 +50,11 @@ class AdminService(BaseService):
                 user_id = user.id
             )
         
-            result.append(
+            result.append((
                 user,
                 transaction if len(transaction) != 0 else None, 
                 fine if len(fine) != 0 else None, 
-            )
+            ))
 
         return result
 
