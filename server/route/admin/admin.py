@@ -153,7 +153,7 @@ def reinstate_user():
 
 @admin.route("/user", methods=["DELETE"])
 @requires_auth(AccountType.ADMIN)
-def reinstate_user():
+def delete_user():
     data = request.args
     user_id = data.get("id")
 
