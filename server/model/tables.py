@@ -198,3 +198,9 @@ class BookReturn(Base):
             date: {self.date}, 
             librarian_id: {self.librarian_id}
         """
+    
+class AppSettings(Base):
+    __tablename__ = "app_settings"
+
+    key: Mapped[str]
+    value: Mapped[str]
