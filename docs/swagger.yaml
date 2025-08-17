@@ -17,6 +17,139 @@ tags:
   - name: Admin
     description: APIs for admins
 paths:
+  /forgot-password:
+    post:
+      summary: Forgot password
+      description: This API is only for librarian and borrower. An email will be sent to the user which should be followed by an API call to /reset-password
+      tags:
+        - Librarian
+        - Borrower
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: test@email.com
+      security: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reset password email sent"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing email field
+              examples:
+                Missing email:
+                  value:
+                    error: Missing email field
+                Invalid email:
+                  value:
+                    error: Invalid email test.com
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Admin cannot use this service
+        "404":
+          description: Email not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Email not found"
+  /reset-password:
+    post:
+      summary: Reset password
+      description: This API is only for librarian and borrower. The user should arrived at the API from their email link to reset password
+      tags:
+        - Librarian
+        - Borrower
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                secret:
+                  type: string
+                  example: a83nfjgh49alsken4b2hf84jvka1248fb
+                password:
+                  type: string
+                  example: examplePassword123
+      security: []
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password successfully updated"
+        "400":
+          description: Error operations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing email field
+              examples:
+                Missing secret:
+                  value:
+                    error: Missing secret field
+                Missing password:
+                  value:
+                    error: Missing password field
+        "401":
+          description: Wrong secret
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Wrong secret a83nfjgh49alsken4b2hf84jvka1248fb
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "User does not exist"
   /{account_type}/login:
     post:
       summary: Authenticate user
@@ -748,63 +881,116 @@ paths:
                     items:
                       type: object
                       properties:
-                        id:
-                          type: integer
-                          example: 12
-                        user_id:
-                          type: integer
-                          example: 56
-                        transaction_id:
-                          type: integer
-                          example: 192
-                        reason:
-                          type: string
-                          example: Lost book
-                        amount:
-                          type: number
-                          format: double
-                          example: 25.00
-                        date:
-                          type: string
-                          format: date-time
-                          example: 2017-07-21T17:32:28Z
-                        paid:
-                          type: boolean
-                          example: false
+                        fine:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 12
+                            user_id:
+                              type: integer
+                              example: 56
+                            transaction_id:
+                              type: integer
+                              example: 192
+                            reason:
+                              type: string
+                              example: Lost book
+                            amount:
+                              type: number
+                              format: double
+                              example: 25.00
+                            date:
+                              type: string
+                              format: date-time
+                              example: 2017-07-21T17:32:28Z
+                            paid:
+                              type: boolean
+                              example: false
+                        book:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 12
+                            title:
+                              type: string
+                              example: test_title
+                            description:
+                              type: string
+                              example: test_description
+                            author:
+                              type: string
+                              example: test_author
+                            condition:
+                              type: string
+                              enum:
+                                [
+                                  NEW,
+                                  LIKE_NEW,
+                                  VERY_GOOD,
+                                  GOOD,
+                                  FAIR,
+                                  WORN,
+                                  DAMAGED,
+                                  UNUSABLE,
+                                ]
+                              example: NEW
+                            on_loan:
+                              type: boolean
+                              example: False
                     example:
-                      - id: 12
-                        user_id: 32
-                        transaction_id: 56
-                        reason: Lost book
-                        amount: 25.00
-                        date: 2017-07-21T17:32:28Z
-                        paid: false
-                      - id: 17
-                        user_id: 32
-                        transaction_id: 59
-                        reason: Lost book
-                        amount: 25.00
-                        date: 2017-07-30T17:32:28Z
-                        paid: true
+                      - book:
+                          id: 12
+                          user_id: 32
+                          transaction_id: 56
+                          reason: Lost book
+                          amount: 25.00
+                          date: 2017-07-21T17:32:28Z
+                          paid: false
+                      - book:
+                          id: 17
+                          user_id: 32
+                          transaction_id: 59
+                          reason: Lost book
+                          amount: 25.00
+                          date: 2017-07-30T17:32:28Z
+                          paid: true
               examples:
                 Fines retrieved:
                   value:
                     message: Fine(s) retrieved
                     data:
-                      - id: 12
-                        user_id: 32
-                        transaction_id: 56
-                        reason: Lost book
-                        amount: 25.00
-                        date: 2017-07-21T17:32:28Z
-                        paid: false
-                      - id: 17
-                        user_id: 32
-                        transaction_id: 59
-                        reason: Lost book
-                        amount: 25.00
-                        date: 2017-07-30T17:32:28Z
-                        paid: true
+                      - fine:
+                          id: 12
+                          user_id: 32
+                          transaction_id: 56
+                          reason: Lost book
+                          amount: 25.00
+                          date: 2017-07-21T17:32:28Z
+                          paid: false
+                        book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
+                      - fine:
+                          id: 17
+                          user_id: 32
+                          transaction_id: 59
+                          reason: Lost book
+                          amount: 25.00
+                          date: 2017-07-30T17:32:28Z
+                          paid: true
+                        book:
+                          id: 12
+                          title: test_title
+                          description: test_description
+                          author: test_author
+                          condition: NEW
+                          on_loan: false
                 No fines:
                   value:
                     message: No fines found
@@ -1306,16 +1492,33 @@ paths:
                           enum: [ACTIVE, SUSPENDED]
                           example: ACTIVE
                     example:
-                      - id: 12
-                        name: admin_name
-                        email: admin@email.com
-                        account_type: ADMIN
-                        account_state: ACTIVE
-                      - id: 15
-                        name: librarian_name
-                        email: lib@email.com
-                        account_type: LIBRARIAN
-                        account_state: SUSPENDED
+                      - user:
+                          id: 12
+                          name: admin_name
+                          email: admin@email.com
+                          account_type: ADMIN
+                          account_state: ACTIVE
+                        transaction:
+                          - id: 21
+                            user_id: 12
+                            book_id: 39
+                            date: 2025-08-17T19:58:00Z
+                            due: 2025-08-20T19:58:00Z
+                            returned: False
+                          - id: 22
+                            user_id: 12
+                            book_id: 40
+                            date: 2025-08-17T19:58:00Z
+                            due: 2025-08-20T19:58:00Z
+                            returned: False
+                        fine:
+                          - id: 33
+                            user_id: 12
+                            transaction_id: 21
+                            reason: Late return
+                            amount: 50
+                            date: 2025-08-17T19:58:00Z
+                            paid: False
         "401":
           description: Authentication error
           content:
