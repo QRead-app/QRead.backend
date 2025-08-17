@@ -61,14 +61,14 @@ def create_app(env: str = None):
         }
     )
     scheduler.add_job(
-        func = lambda: due_date_reminder(Session),
+        func = due_date_reminder,
         id = "due_date_reminder",
-        trigger = CronTrigger.from_crontab("0 16 * * *")
+        trigger = CronTrigger.from_crontab("0 16 * * *"),
+        replace_existing = True
     )
+    scheduler.start()
     
     return app
-
-scheduler.start()
 
 def handle_database_error(e):
     return jsonify({"error": "Internal server error"}), 500
