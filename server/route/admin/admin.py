@@ -182,10 +182,10 @@ def update_app_setting():
     value = data.get("value")
 
     if key is None:
-        return jsonify({"error": f"Missing key field"})
+        return jsonify({"error": f"Missing key field"}), 400
     
     if value is None:
-        return jsonify({"error": f"Missing value field"})
+        return jsonify({"error": f"Missing value field"}), 400
 
     try:
         user = AdminService(g.Session).update_setting(key, value)

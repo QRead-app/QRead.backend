@@ -25,6 +25,7 @@ paths:
         - Librarian
         - Borrower
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -90,6 +91,7 @@ paths:
         - Librarian
         - Borrower
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -167,6 +169,7 @@ paths:
         - Borrower
         - Admin
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -232,6 +235,7 @@ paths:
         - Borrower
         - Admin
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1459,6 +1463,7 @@ paths:
       tags:
         - Librarian
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1838,6 +1843,7 @@ paths:
       tags:
         - Admin
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -1889,6 +1895,74 @@ paths:
                   error:
                     type: string
                     example: Unauthorized
+  /admin/app-setting:
+    put:
+      summary: Update a setting
+      tags:
+        - Admin
+      security:
+        - qread.backend_auth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                key:
+                  type: string
+                  example: reminder_x_days_before_due
+                value:
+                  type: integer
+                  example: 5
+      responses:
+        "200":
+          description: App setting updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Setting updated successfully"
+        "400":
+          description: Key not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Key random_key not found"
+              examples:
+                Missing key:
+                  value:
+                    error: Missing key field
+                Missing value:
+                  value:
+                    error: Missing value field
+        "401":
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "404":
+          description: Key not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Key random_key not found"
 
 components:
   securitySchemes:
