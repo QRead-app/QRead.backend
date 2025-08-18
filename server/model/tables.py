@@ -165,6 +165,7 @@ class BookTransaction(Base):
     date: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), server_default=func.now())
     due: Mapped[datetime]
     returned: Mapped[bool] = mapped_column(server_default="False")
+    extended: Mapped[bool] = mapped_column(server_default="False")
 
     user: Mapped["User"] = relationship(back_populates="transactions")
     book: Mapped["Book"] = relationship(back_populates="transactions")
@@ -178,6 +179,8 @@ class BookTransaction(Base):
             book_id: {self.book_id},
             date: {self.date}, 
             due: {self.due}
+            returned: {self.returned},
+            extended: {self.extended}
         """
     
 class BookReturn(Base):
