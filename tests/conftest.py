@@ -65,7 +65,7 @@ def runner(app):
 @pytest.fixture(scope="session", autouse=True)
 def app_configuration(app, runner):
     with app.app_context():
-        db = DB(app.config["TEST_CONNECTION_STRING"])
+        db = DB.get_db()
         Session = db.get_sessionmaker()
 
         with Session.begin() as session:
