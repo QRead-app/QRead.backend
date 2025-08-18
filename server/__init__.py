@@ -12,7 +12,6 @@ from server.model.seed import seed_db
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.triggers.cron import CronTrigger
 
-
 def create_app(env: str = None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py', silent=False)
@@ -49,25 +48,23 @@ def create_app(env: str = None):
     def load_session():
         g.Session = Session
 
-    app.register_error_handler(
-        DatabaseError,
-        handle_database_error
-    )
+    def due_date_reminder_job():
+        with app.app_context():
+            due_date_reminder()
 
-    scheduler.configure(
-        jobstores = {
-            "default": SQLAlchemyJobStore(
-                engine = db.get_engine()
-            )
-        }
-    )
     scheduler.add_job(
-        func = due_date_reminder,
+        func = due_date_reminder_job,
         id = "due_date_reminder",
         trigger = CronTrigger.from_crontab("0 16 * * *"),
         replace_existing = True
     )
-    scheduler.start()
+    with app.app_context():
+        scheduler.start()
+
+    app.register_error_handler(
+        DatabaseError,
+        handle_database_error
+    )
     
     return app
 
