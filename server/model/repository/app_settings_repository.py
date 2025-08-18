@@ -10,10 +10,10 @@ class AppSettingsRepository(BaseRepository):
     def get_setting(
         self, 
         key: str
-    ) -> AppSettings:
+    ) -> list[AppSettings]:
         return self.session.execute(
             select(AppSettings).where(AppSettings.key == key)
-        ).scalars().all()[0]
+        ).scalars().all()
 
     def insert_setting(
         self, 

@@ -173,3 +173,23 @@ def delete_user():
     AdminService(g.Session).delete_user(user[0])
 
     return jsonify({"message": f"User deleted succesfully"}), 200
+
+@admin.route("/app-setting", methods=["PUT"])
+@requires_auth(AccountType.ADMIN)
+def update_app_setting():
+    data = request.json
+    key = data.get("key")
+    value = data.get("value")
+
+    if key is None:
+        return jsonify({"error": f"Missing key field"})
+    
+    if value is None:
+        return jsonify({"error": f"Missing value field"})
+
+    try:
+        user = AdminService(g.Session).update_setting(key, value)
+    except RecordNotFoundError:
+        return jsonify({"error": f"Key {key} not found"}), 404
+
+    return jsonify({"message": f"Setting updated succesfully"}), 200

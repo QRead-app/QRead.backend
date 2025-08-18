@@ -1,9 +1,10 @@
-from server.exceptions import EmailAlreadyExistsError, RecordNotFoundError
+from server.exceptions import ConversionError, EmailAlreadyExistsError, RecordNotFoundError
+from server.model.repository.app_settings_repository import AppSettingsRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
 from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountState, AccountType, BookTransaction, Fine, User
+from server.model.tables import AccountState, AccountType, AppSettings, BookTransaction, Fine, User
 from server.model.repository.user_account_repository import UserAccountRepository
 from sqlalchemy.exc import NoResultFound
 
@@ -111,3 +112,21 @@ class AdminService(BaseService):
     @transactional
     def delete_user(self, user: User) -> None:
         UserAccountRepository(self.session).delete_user(user)
+
+    @transactional
+    def update_setting(self, key: str, value: str) -> None:
+        setting = AppSettingsRepository(self.session).get_setting(key)
+
+        if len(setting) == 0:
+            RecordNotFoundError()
+
+        if (
+            key == "reminder_every_x_days"
+            or key == "reminder_x_days_before_due"
+        ):
+            try:
+                AppSettings.str_to_int(value)
+            except ConversionError:
+                raise ConversionError()
+            
+        setting[0].value = value

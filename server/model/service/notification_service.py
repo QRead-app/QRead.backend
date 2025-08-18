@@ -25,8 +25,8 @@ def due_date_reminder() -> None:
             transactions = transaction_repo.get_transactions(
                 returned = False
             )
-            reminder_before_x = int(settings_repo.get_setting("reminder_x_days_before_due").value)
-            reminder_every_x = int(settings_repo.get_setting("reminder_every_x_days").value)
+            reminder_before_x = int(settings_repo.get_setting("reminder_x_days_before_due")[0].value)
+            reminder_every_x = int(settings_repo.get_setting("reminder_every_x_days")[0].value)
 
             now = datetime.now()
 
