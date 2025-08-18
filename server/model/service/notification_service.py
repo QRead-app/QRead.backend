@@ -11,7 +11,7 @@ from server.util.mailer import mailer
 
 def due_date_reminder() -> None:
     with current_app.app_context():
-        db = DB(current_app.config["CONNECTION_STRING"])
+        db = DB.get_db()
         Session = db.get_sessionmaker()
 
         with Session.begin() as session:
