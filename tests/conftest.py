@@ -15,7 +15,18 @@ def app():
 
 @pytest.fixture
 def client(app):
-    return app.test_client()
+    client = app.test_client()
+
+    class ClientWrapper:
+        def get(self, *args, **kwargs):
+            kwargs.setdefault("headers", {})["Origin"] = "http://other-site.com"
+            return client.get(*args, **kwargs)
+
+        def post(self, *args, **kwargs):
+            kwargs.setdefault("headers", {})["Origin"] = "http://other-site.com"
+            return client.post(*args, **kwargs)
+
+    return ClientWrapper()
 
 @pytest.fixture
 def client_factory(app):
