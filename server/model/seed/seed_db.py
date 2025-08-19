@@ -35,7 +35,7 @@ def seed_db_command():
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
     
-    db = DB(app.config["CONNECTION_STRING"])
+    db = DB()
     Session = db.get_sessionmaker()
 
     with Session.begin() as session:
