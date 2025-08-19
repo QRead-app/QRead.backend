@@ -67,13 +67,12 @@ def app_configuration(app, runner):
     with app.app_context():
         db = DB.get_db()
         Session = db.get_sessionmaker()
+        runner.invoke(args=["seed-db"])
 
         with Session.begin() as session:
             user_repo = UserAccountRepository(session)
             book_repo = BookRepository(session)
             hasher = Hasher()
-
-            runner.invoke(args=["seed-db"])
 
             # Insert test users
             user_repo.insert_user(
