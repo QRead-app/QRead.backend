@@ -30,17 +30,19 @@ def upgrade() -> None:
         'WORN', 
         'DAMAGED', 
         'UNUSABLE',
-        name='bookcondition'
+        name='bookcondition',
+        create_type=False
     )
-    book_condition.create(op.get_bind(), checkfirst=True) 
+    book_condition.create(op.get_bind()) 
 
     account_type = postgresql.ENUM(
         'ADMIN', 
         'LIBRARIAN', 
         'BORROWER',
-        name='accounttype'
+        name='accounttype',
+        create_type=False
     )
-    account_type.create(op.get_bind(), checkfirst=True) 
+    account_type.create(op.get_bind()) 
 
     op.create_table('book',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -102,7 +104,7 @@ def downgrade() -> None:
         'UNUSABLE',
         name='bookcondition'
     )
-    book_condition.drop(op.get_bind(), checkfirst=True) 
+    book_condition.drop(op.get_bind()) 
 
     account_type = postgresql.ENUM(
         'ADMIN', 
@@ -110,5 +112,5 @@ def downgrade() -> None:
         'BORROWER',
         name='accounttype'
     )
-    account_type.drop(op.get_bind(), checkfirst=True) 
+    account_type.drop(op.get_bind()) 
     # ### end Alembic commands ###
