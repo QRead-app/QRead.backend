@@ -27,7 +27,7 @@ def upgrade() -> None:
         'SUSPENDED',
         name='accountstate'
     )
-    account_state_enum.create(op.get_bind()) 
+    account_state_enum.create(op.get_bind(), checkfirst=True) 
 
     op.add_column(
         'user_account', 
@@ -52,5 +52,5 @@ def downgrade() -> None:
         'SUSPENDED',
         name='accountstate'
     )
-    account_state_enum.drop(op.get_bind())
+    account_state_enum.drop(op.get_bind(), checkfirst=True)
     # ### end Alembic commands ###
