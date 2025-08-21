@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, g, jsonify
 from flask_cors import CORS
 from server.model.service.notification_service import due_date_reminder
@@ -21,14 +22,13 @@ def create_app(env: str = None):
 
     if app.config["ENVIRONMENT"] == 'development':
         app.config.from_object('server.config.DevelopmentConfig')
-        CORS(app)
     if app.config["ENVIRONMENT"] == 'production':
         app.config.from_object('server.config.ProductionConfig')
     if app.config["ENVIRONMENT"] == 'testing':
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
-        CORS(app)
-        
+     
+    CORS(app) 
     seed_db.init_app(app)
     otp_cache.init_app(app)
     forgot_password_cache.init_app(app)
@@ -63,7 +63,11 @@ def create_app(env: str = None):
         DatabaseError,
         handle_database_error
     )
-    
+   
+    gunicorn_logger = logging.getLogger("gunicorn.error")
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(logging.INFO)
+
     return app
 
 def handle_database_error(e):
