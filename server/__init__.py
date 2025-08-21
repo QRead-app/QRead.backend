@@ -40,12 +40,10 @@ def create_app(env: str = None):
     app.register_blueprint(librarian)
     app.register_blueprint(common)
 
-    with app.app_context():
-        db = DB.get_db()
-    Session = db.get_sessionmaker()
-
     @app.before_request
     def load_session():
+        db = DB.get_db()
+        Session = db.get_sessionmaker()
         g.Session = Session
 
     def due_date_reminder_job():
