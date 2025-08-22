@@ -20,10 +20,11 @@ paths:
   /forgot-password:
     post:
       summary: Forgot password
-      description: This API is only for librarian and borrower. An email will be sent to the user which should be followed by an API call to /reset-password
+      description: An email will be sent to the user which should be followed by an API call to /reset-password
       tags:
         - Librarian
         - Borrower
+        - Admin
       requestBody:
         required: true
         content:
@@ -86,10 +87,11 @@ paths:
   /reset-password:
     post:
       summary: Reset password
-      description: This API is only for librarian and borrower. The user should arrived at the API from their email link to reset password
+      description: The user should arrived at the API from their email link to reset password
       tags:
         - Librarian
         - Borrower
+        - Admin
       requestBody:
         required: true
         content:
