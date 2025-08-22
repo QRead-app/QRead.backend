@@ -158,7 +158,7 @@ def reset_password():
         return jsonify({"error": "Missing password field"}), 400
     
     try:
-        CommonService(g.Session).reset_password(secret)
+        CommonService(g.Session).reset_password(secret, password)
     except IncorrectCredentialsError:
         return jsonify({"error": f"Wrong secret {secret}"}), 401
     except RecordNotFoundError:
