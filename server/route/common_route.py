@@ -129,15 +129,18 @@ def get_book():
 def forgot_password():
     data = request.json
     email = data.get("email")
+    redirect_url = data.get("redirect")
 
     if email is None:
         return jsonify({"error": "Missing email field"}), 400
+    if redirect_url is None:
+        return jsonify({"error": "Missing redirect field"}), 400
     
     if not User.is_email(email):
         return jsonify({"error": f"Invalid email {email}"}), 400
     
     try:
-        CommonService(g.Session).forgot_password(email)
+        CommonService(g.Session).forgot_password(email, redirect_url)
     except RecordNotFoundError:
         return jsonify({"error": "Email not found"}), 404
     # except AuthorizationError:

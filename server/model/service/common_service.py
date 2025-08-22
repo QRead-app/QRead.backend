@@ -83,7 +83,7 @@ class CommonService(BaseService):
         return books
     
     @transactional
-    def forgot_password(self, email: str) -> None:
+    def forgot_password(self, email: str, redirect_url: str) -> None:
         user = UserAccountRepository(self.session).get_user(
             email = email
         )
@@ -100,7 +100,7 @@ class CommonService(BaseService):
         #     raise AuthorizationError()
         
         secret = otp.generate_forgot_password_otp(user.id)
-        mailer.send_forgot_password(user.email, secret)
+        mailer.send_forgot_password(user.email, secret, redirect_url)
 
     @transactional
     def reset_password(self, secret: str, password: str) -> None:
