@@ -96,8 +96,8 @@ class CommonService(BaseService):
         
         user = user[0]
 
-        if user.account_type == AccountType.ADMIN:
-            raise AuthorizationError()
+        # if user.account_type == AccountType.ADMIN:
+        #     raise AuthorizationError()
         
         secret = otp.generate_forgot_password_otp(user.id)
         mailer.send_forgot_password(user.email, secret)

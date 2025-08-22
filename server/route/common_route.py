@@ -140,8 +140,8 @@ def forgot_password():
         CommonService(g.Session).forgot_password(email)
     except RecordNotFoundError:
         return jsonify({"error": "Email not found"}), 404
-    except AuthorizationError:
-        return jsonify({"error": "Admin cannot use this service"}), 401
+    # except AuthorizationError:
+    #     return jsonify({"error": "Admin cannot use this service"}), 401
     
     return jsonify({"message": "Reset password email sent"}), 200
 
