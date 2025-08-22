@@ -28,7 +28,19 @@ def create_app(env: str = None):
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
      
-    CORS(app) 
+    def cors_origin(origin):
+        if origin is None:
+            return False
+        if app.config.get("ENVIRONMENT") == "development":
+            return origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1")
+
+    CORS(
+        app,
+        origins=cors_origin,
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
+    )
     seed_db.init_app(app)
     otp_cache.init_app(app)
     forgot_password_cache.init_app(app)

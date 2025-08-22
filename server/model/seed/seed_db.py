@@ -95,6 +95,14 @@ def seed_db_command():
             "ACTIVE"
         )
 
+        user = user_account_repo.insert_user(
+            "aziz", 
+            "azxz1603@gmail.com", 
+            Hasher().hash("123456"), 
+            "LIBRARIAN",
+            "ACTIVE"
+        )
+
         # Seed books
         print("Seeding books...")
 
