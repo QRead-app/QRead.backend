@@ -19,6 +19,7 @@ def create_app(env: str = None):
 
     if env is not None:
         app.config["ENVIRONMENT"] = env
+    env = app.config["ENVIRONMENT"]
 
     if app.config["ENVIRONMENT"] == 'development':
         app.config.from_object('server.config.DevelopmentConfig')
@@ -27,19 +28,10 @@ def create_app(env: str = None):
     if app.config["ENVIRONMENT"] == 'testing':
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
-     
-    def cors_origin(origin):
-        if origin is None:
-            return False
-        if app.config.get("ENVIRONMENT") == "development":
-            return origin.startswith("http://localhost") or origin.startswith("http://127.0.0.1")
-
+        
     CORS(
         app,
-        origins=cors_origin,
-        supports_credentials=True,
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization"]
+        supports_credentials=True
     )
     seed_db.init_app(app)
     otp_cache.init_app(app)
