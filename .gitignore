@@ -3,4 +3,4 @@ instance/config.py
 __pycache__/
 *.log
 *.out
-*.key
+key.*
