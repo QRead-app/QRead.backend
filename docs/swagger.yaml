@@ -35,6 +35,9 @@ paths:
                 email:
                   type: string
                   example: test@email.com
+                redirect:
+                  type: string
+                  example: http://localhost:5173
       security: []
       responses:
         "200":
@@ -1854,6 +1857,9 @@ paths:
                 email:
                   type: string
                   example: test@email.com
+                redirect:
+                  type: string
+                  example: http://localhost:5173
       security:
         - qread.backend_auth: []
       responses:
