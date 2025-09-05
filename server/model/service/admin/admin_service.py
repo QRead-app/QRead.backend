@@ -39,14 +39,14 @@ class AdminService(BaseService):
         user = UserAccountRepository(self.session).get_user(
             email = email
         )
-        print(user)
-        if len(user) > 1:
+
+        if len(user) > 0:
             raise EmailAlreadyExistsError(email)
         
         password = hasher.hash(password)
 
-        user = UserAccountRepository(self.session).insert_user(
-            name, email, password, AccountType.LIBRARIAN)
+        # user = UserAccountRepository(self.session).insert_user(
+        #     name, email, password, AccountType.LIBRARIAN)
 
         return user
 
