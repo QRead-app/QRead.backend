@@ -12,15 +12,18 @@ admin = Blueprint('admin', __name__, url_prefix="/admin")
 def register_librarian():
     data = request.json
     email = data.get("email")
+    redirect = data.get("redirect")
 
     if email is None:
         return jsonify({"error": "Missing email field"}), 400
+    if redirect is None:
+        return jsonify({"error": "Missing redirect field"}), 400
 
     if not User.is_email(email):
         return jsonify({"error": f"Invalid email {email}"}), 400
     
     try:
-        AdminService(g.Session).register_librarian(email)
+        AdminService(g.Session).register_librarian(email, redirect)
     except EmailAlreadyExistsError as e:
         return jsonify({"error": f"Email {email} is already registered"}), 400
 

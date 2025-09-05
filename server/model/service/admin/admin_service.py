@@ -17,7 +17,7 @@ class AdminService(BaseService):
         super().__init__(Session)
 
     @transactional
-    def register_librarian(self, email: str) -> None:
+    def register_librarian(self, email: str, redirect: str) -> None:
         user = UserAccountRepository(self.session).get_user(
             email = email
         )
@@ -26,7 +26,7 @@ class AdminService(BaseService):
             raise EmailAlreadyExistsError()
         
         secret = otp.generate_librarian_secret(email)
-        mailer.send_new_librarian(user.email, secret)
+        mailer.send_new_librarian(user.email, secret, redirect)
 
     @transactional
     def new_librarian(

@@ -32,7 +32,7 @@ class Mailer:
 
         mail.send(msg)
 
-    def send_new_librarian(self, to: str, secret: str) -> None:
+    def send_new_librarian(self, to: str, secret: str, redirect: str) -> None:
         if not User.is_email(to):
             raise ValueError()
         
@@ -40,7 +40,7 @@ class Mailer:
             subject = "QRead OTP",
             sender = "noreply@QRead.com",
             recipients = [to],
-            body = f"Your new librarian account secret is {secret}"
+            body = f"Create new librarian account: {redirect}?secret={secret}"
         )
 
         mail.send(msg)
