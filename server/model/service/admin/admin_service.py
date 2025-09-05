@@ -26,7 +26,7 @@ class AdminService(BaseService):
             raise EmailAlreadyExistsError()
         
         secret = otp.generate_librarian_secret(email)
-        mailer.send_new_librarian(user.email, secret, redirect)
+        mailer.send_new_librarian(email, secret, redirect)
 
     @transactional
     def new_librarian(
