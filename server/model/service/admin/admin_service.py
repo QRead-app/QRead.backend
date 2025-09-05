@@ -22,7 +22,7 @@ class AdminService(BaseService):
             email = email
         )
 
-        if len(user) > 1:
+        if len(user) > 0:
             raise EmailAlreadyExistsError()
         
         secret = otp.generate_librarian_secret(email)
@@ -39,7 +39,7 @@ class AdminService(BaseService):
         user = UserAccountRepository(self.session).get_user(
             email = email
         )
-
+        print(user)
         if len(user) > 1:
             raise EmailAlreadyExistsError(email)
         
