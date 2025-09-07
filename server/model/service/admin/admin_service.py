@@ -45,8 +45,8 @@ class AdminService(BaseService):
         
         password = hasher.hash(password)
 
-        # user = UserAccountRepository(self.session).insert_user(
-        #     name, email, password, AccountType.LIBRARIAN)
+        user = UserAccountRepository(self.session).insert_user(
+            name, email, password, AccountType.LIBRARIAN)
 
         return user
 
