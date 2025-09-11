@@ -13,7 +13,7 @@ class Config:
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_PARTITIONED = False
     SESSION_COOKIE_SAMESITE = 'None'
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes = 30)
+    PERMANENT_SESSION_LIFETIME = timedelta(hours = 4)
     SESSION_REFRESH_EACH_REQUEST = True
 
     USE_X_SENDFILE = False
@@ -45,6 +45,7 @@ class ProductionConfig(Config):
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_PARTITIONED = True
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes= 30)
 
     PROPAGATE_EXCEPTIONS = False
     TRAP_HTTP_EXCEPTIONS = False
