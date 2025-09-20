@@ -1,4 +1,4 @@
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, g, jsonify, request, session
 
 from server.exceptions import ConversionError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.service.admin.admin_service import AdminService
@@ -118,12 +118,16 @@ def update_account():
     account_type = data.get("type") 
     account_state = data.get("state")
     password = data.get("password")
+    newpassword = data.get("newpassword")
 
     if id is not None:
         try:
             id = User.str_to_int(id)
         except ConversionError:
             return jsonify({"error": f"Invalid id {id}"}), 400
+        
+    if id is None:
+        id = session["session"]["id"]
         
     if email is not None:
         try:
@@ -150,7 +154,8 @@ def update_account():
             email = email,
             account_type = account_type,
             account_state = account_state,
-            password = password
+            password = password,
+            newpassword = newpassword
         )
     except RecordNotFoundError:
         return jsonify({

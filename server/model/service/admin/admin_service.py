@@ -105,10 +105,12 @@ class AdminService(BaseService):
         email: str = None,
         account_type: AccountType = None,
         account_state: AccountState = None,
-        password: str = None
+        password: str = None,
+        newpassword: str = None
     ) -> User:
         user = UserAccountRepository(self.session).get_user(
-            id=id
+            id=id,
+            password = password
         )
 
         if len(user) == 0:
@@ -119,7 +121,7 @@ class AdminService(BaseService):
             "email": email,
             "account_type": account_type,
             "account_state": account_state,
-            "password": password
+            "password": newpassword,
         }.items():
             if val is not None:
                 setattr(user, field, val)
