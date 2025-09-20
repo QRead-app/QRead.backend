@@ -3,10 +3,11 @@ from server.exceptions import BookBorrowingError, DatabaseError, RecordNotFoundE
 from server.model.repository.book_repository import BookRepository
 from server.model.repository.book_return_repository import BookReturnRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
+from server.model.repository.user_account_repository import UserAccountRepository
 from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import Book, BookCondition, BookReturn, Fine
+from server.model.tables import Book, BookCondition, BookReturn, Fine, User
 
 class LibrarianService(BaseService):
     def __init__(self, Session):
@@ -95,3 +96,30 @@ class LibrarianService(BaseService):
         )
 
         return bookreturn
+    
+    @transactional
+    def update_user(
+        self, 
+        id: int = None, 
+        name: str = None,
+        email: str = None,
+        password: str = None,
+        newpassword: str = None
+    ) -> User:
+        user = UserAccountRepository(self.session).get_user(
+            id=id,
+            password = password
+        )
+
+        if len(user) == 0:
+            raise RecordNotFoundError()
+        
+        for field, val in {
+            "name": name,
+            "email": email,
+            "password": newpassword,
+        }.items():
+            if val is not None:
+                setattr(user, field, val)
+
+        return user

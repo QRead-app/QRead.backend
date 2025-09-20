@@ -3,7 +3,7 @@ from flask import Blueprint, g, jsonify, request, session
 from server.exceptions import BookBorrowingError, ConversionError, RecordNotFoundError
 from server.model.service.common_service import CommonService
 from server.model.service.librarian.librarian_service import LibrarianService
-from server.model.tables import AccountType, Book, Fine
+from server.model.tables import AccountType, Book, Fine, User
 from server.route.requires_auth_wrapper import requires_auth
 
 librarian = Blueprint('librarian', __name__, url_prefix="/librarian")
@@ -181,3 +181,45 @@ def return_book():
         return jsonify({"error": f"Book id {book_id} is not borrowed"}), 400
     
     return jsonify({"message": "Book returned successfully"}), 200
+
+@librarian.route("/account", methods=["PUT"])
+@requires_auth(AccountType.LIBRARIAN)
+def update_account():
+    data = request.args
+    id = data.get("id") 
+    name = data.get("name") 
+    email = data.get("email") 
+    password = data.get("password")
+    newpassword = data.get("newpassword")
+
+    if id is not None:
+        try:
+            id = User.str_to_int(id)
+        except ConversionError:
+            return jsonify({"error": f"Invalid id {id}"}), 400
+        
+    if id is None:
+        id = session["session"]["id"]
+        
+    if email is not None:
+        try:
+            email = User.is_email(email)
+        except ConversionError:
+            return jsonify({"error": f"Invalid email {email}"}), 400
+
+    try:
+        LibrarianService(g.Session).update_user(
+            id = id,
+            name = name,
+            email = email,
+            password = password,
+            newpassword = newpassword
+        )
+    except RecordNotFoundError:
+        return jsonify({
+            "message": "User not found"
+        }), 200
+
+    return jsonify({
+        "message": "User updated"
+    }), 200
