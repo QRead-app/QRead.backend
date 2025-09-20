@@ -114,7 +114,6 @@ def remove_book():
     return jsonify({"message": "Book removed successfully"}), 200
 
 @librarian.route("/book", methods=["PUT"])
-@requires_auth(AccountType.LIBRARIAN)
 def update_book():
     data = request.json
     book_id = data.get("id")
@@ -126,7 +125,6 @@ def update_book():
 
     if book_id is None:
         return jsonify({"error": "Missing id field"}), 400
-
     try:
         book_id = Book.str_to_int(book_id)
     except ConversionError:
@@ -148,12 +146,10 @@ def update_book():
     )
 
     try:
-        old_book = CommonService(g.Session).get_book(id = book_id)
+        LibrarianService(g.Session).update_book(book_id, new_book)
     except RecordNotFoundError:
         return jsonify({"error": f"Book {book_id} does not exist"}), 404 
 
-    LibrarianService(g.Session).update_book(old_book[0], new_book)
-    
     return jsonify({"message": "Book updated successfully"}), 200
 
 @librarian.route("/return-book", methods=["POST"])

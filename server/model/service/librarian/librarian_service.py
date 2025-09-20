@@ -1,3 +1,4 @@
+
 from decimal import Decimal
 from server.exceptions import BookBorrowingError, DatabaseError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.repository.book_repository import BookRepository
@@ -5,6 +6,7 @@ from server.model.repository.book_return_repository import BookReturnRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
 from server.model.repository.user_account_repository import UserAccountRepository
 from server.model.repository.fine_repository import FineRepository
+from server.model.service.common_service import CommonService
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
 from server.model.tables import Book, BookCondition, BookReturn, Fine, User
@@ -53,12 +55,14 @@ class LibrarianService(BaseService):
         book_repo.delete_book(book[0])
     
     @transactional
-    def update_book(self, old_book: Book, new_book: Book) -> Book:
+    def update_book(self, id: int, new_book: Book) -> Book:
+        old_book = BookRepository(self.session).get_book(id)[0]
+
         for attr in ("title", "description", "author", "condition", "on_loan"):
             val = getattr(new_book, attr)
             if val is not None:
                 setattr(old_book, attr, val)
-
+                
         return old_book
     
     @transactional
