@@ -122,7 +122,7 @@ class LibrarianService(BaseService):
         for field, val in {
             "name": name,
             "email": email,
-            "password": newpassword,
+            "password": hasher.hash(newpassword),
         }.items():
             if val is not None:
                 setattr(user, field, val)
