@@ -1,5 +1,5 @@
 from decimal import Decimal
-from server.exceptions import BookBorrowingError, DatabaseError, RecordNotFoundError
+from server.exceptions import BookBorrowingError, DatabaseError, IncorrectCredentialsError, RecordNotFoundError
 from server.model.repository.book_repository import BookRepository
 from server.model.repository.book_return_repository import BookReturnRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
@@ -8,6 +8,7 @@ from server.model.repository.fine_repository import FineRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
 from server.model.tables import Book, BookCondition, BookReturn, Fine, User
+from server.util.hasher import hasher
 
 class LibrarianService(BaseService):
     def __init__(self, Session):
@@ -107,12 +108,16 @@ class LibrarianService(BaseService):
         newpassword: str = None
     ) -> User:
         user = UserAccountRepository(self.session).get_user(
-            id=id,
-            password = password
+            id=id
         )
 
         if len(user) == 0:
             raise RecordNotFoundError()
+        
+        user = user[0]
+
+        if not hasher.verify(user.password, password):
+            raise IncorrectCredentialsError("Authentication failed")
         
         for field, val in {
             "name": name,
