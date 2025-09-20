@@ -105,7 +105,6 @@ class Book(Base):
     author: Mapped[str]
     condition: Mapped[BookCondition]
     on_loan: Mapped[bool] = mapped_column(server_default="False")
-    image
 
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="book")
 
