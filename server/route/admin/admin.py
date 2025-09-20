@@ -108,6 +108,59 @@ def get_users():
         "data": data
     }), 200
 
+@admin.route("/user", methods=["PUT"])
+@requires_auth(AccountType.ADMIN)
+def update_account():
+    data = request.args
+    id = data.get("id") 
+    name = data.get("name") 
+    email = data.get("email") 
+    account_type = data.get("type") 
+    account_state = data.get("state")
+    password = data.get("password")
+
+    if id is not None:
+        try:
+            id = User.str_to_int(id)
+        except ConversionError:
+            return jsonify({"error": f"Invalid id {id}"}), 400
+        
+    if email is not None:
+        try:
+            email = User.is_email(email)
+        except ConversionError:
+            return jsonify({"error": f"Invalid email {email}"}), 400
+        
+    if account_type is not None:
+        try:
+            account_type = User.str_to_account_type(account_type)
+        except ConversionError:
+            return jsonify({"error": f"Invalid account_type {account_type}"}), 400
+        
+    if account_state is not None:
+        try:
+            account_state = User.str_to_account_state(account_state)
+        except ConversionError:
+            return jsonify({"error": f"Invalid account_state {account_state}"}), 400
+
+    try:
+        AdminService(g.Session).update_user(
+            id = id,
+            name = name,
+            email = email,
+            account_type = account_type,
+            account_state = account_state,
+            password = password
+        )
+    except RecordNotFoundError:
+        return jsonify({
+            "message": "User not found"
+        }), 200
+
+    return jsonify({
+        "message": "User updated"
+    }), 200
+
 @admin.route("/suspend-user", methods=["POST"])
 @requires_auth(AccountType.ADMIN)
 def suspend_user():

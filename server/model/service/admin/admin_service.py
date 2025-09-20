@@ -96,6 +96,35 @@ class AdminService(BaseService):
             ))
 
         return result
+    
+    @transactional
+    def update_user(
+        self, 
+        id: int = None, 
+        name: str = None,
+        email: str = None,
+        account_type: AccountType = None,
+        account_state: AccountState = None,
+        password: str = None
+    ) -> User:
+        user = UserAccountRepository(self.session).get_user(
+            id=id
+        )
+
+        if len(user) == 0:
+            raise RecordNotFoundError()
+        
+        for field, val in {
+            "name": name,
+            "email": email,
+            "account_type": account_type,
+            "account_state": account_state,
+            "password": password
+        }.items():
+            if val is not None:
+                setattr(user, field, val)
+
+        return user
 
     @transactional
     def suspend_user(self, user: User) -> User:
