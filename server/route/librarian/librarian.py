@@ -68,9 +68,9 @@ def add_book():
     except ConversionError as e:
         return jsonify({"error": f"Invalid condition {condition}"}), 400
 
-    LibrarianService(g.Session).add_book(title, description, author, condition)
+    book = LibrarianService(g.Session).add_book(title, description, author, condition)
     
-    return jsonify({"message": "Book added successfully"}), 200
+    return jsonify({"message": "Book added successfully", "data": book}), 200
 
 @librarian.route("/books", methods=["GET"])
 @requires_auth(AccountType.LIBRARIAN)
