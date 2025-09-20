@@ -70,7 +70,7 @@ def add_book():
 
     book = LibrarianService(g.Session).add_book(title, description, author, condition)
     
-    return jsonify({"message": "Book added successfully", "data": book}), 200
+    return jsonify({"message": "Book added successfully", "data": book.to_dict()}), 200
 
 @librarian.route("/books", methods=["GET"])
 @requires_auth(AccountType.LIBRARIAN)
