@@ -50,7 +50,7 @@ class LibrarianService(BaseService):
         if len(book) > 1:
             raise DatabaseError()
 
-        book_repo.delete_book(book)
+        book_repo.delete_book(book[0])
     
     @transactional
     def update_book(self, old_book: Book, new_book: Book) -> Book:
