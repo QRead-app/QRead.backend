@@ -185,7 +185,7 @@ def return_book():
 @librarian.route("/account", methods=["PUT"])
 @requires_auth(AccountType.LIBRARIAN)
 def update_account():
-    data = request.args
+    data = request.json
     id = data.get("id") 
     name = data.get("name") 
     email = data.get("email") 
