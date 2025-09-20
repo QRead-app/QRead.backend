@@ -114,6 +114,7 @@ def remove_book():
     return jsonify({"message": "Book removed successfully"}), 200
 
 @librarian.route("/book", methods=["PUT"])
+@requires_auth(AccountType.LIBRARIAN)
 def update_book():
     data = request.json
     book_id = data.get("id")
