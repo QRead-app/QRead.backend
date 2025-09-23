@@ -2,8 +2,9 @@ from server.exceptions import AuthorizationError, DatabaseError, IncorrectCreden
 from server.model.repository.book_repository import BookRepository
 from server.model.service.base_service import BaseService
 from server.model.service.transactional_wrapper import transactional
-from server.model.tables import AccountState, AccountType, Book, BookCondition, User
+from server.model.tables import AccountState, AccountType, Book, BookCondition, BookTransaction, User
 from server.model.repository.user_account_repository import UserAccountRepository
+from server.model.repository.book_transaction_repository import BookTransactionRepository
 from server.util.mailer import mailer
 from server.util.otp import otp
 from server.util.hasher import hasher
@@ -81,6 +82,20 @@ class CommonService(BaseService):
             raise RecordNotFoundError()
 
         return books
+    
+    @transactional
+    def get_transaction(self, book_id: int) -> BookTransaction:
+        transaction = BookTransactionRepository(self.session).get_transactions(
+            book_id=book_id
+        )
+
+        if len(transaction) == 0:
+            raise RecordNotFoundError()
+        
+        if len(transaction) > 1:
+            raise DatabaseError()
+        
+        return transaction[0];
     
     @transactional
     def forgot_password(self, email: str, redirect_url: str) -> None:
