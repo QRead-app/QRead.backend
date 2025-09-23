@@ -13,14 +13,14 @@ librarian = Blueprint('librarian', __name__, url_prefix="/librarian")
 def issue_fine():
     data = request.json
     user_id = data.get("user_id")
-    transaction_id = data.get("transaction_id")
+    book_id = data.get("book_id")
     amount = data.get("amount")
     reason = data.get("reason")
     
     if user_id is None:
         return jsonify({"error": "Missing user_id field"}), 400
-    if transaction_id is None:
-        return jsonify({"error": "Missing transaction_id field"}), 400
+    if book_id is None:
+        return jsonify({"error": "Missing book_id field"}), 400
     if amount is None:
         return jsonify({"error": "Missing amount field"}), 400
     if reason is None:
@@ -32,16 +32,16 @@ def issue_fine():
         return jsonify({"error": f"Invalid user_id {user_id}"}), 400
     
     try:
-        transaction_id = Fine.str_to_int(transaction_id)
+        book_id = Fine.str_to_int(book_id)
     except ConversionError as e:
-        return jsonify({"error": f"Invalid transaction id {transaction_id}"}), 400
+        return jsonify({"error": f"Invalid transaction id {book_id}"}), 400
         
     try:
         amount = Fine.str_to_decimal(amount)
     except ConversionError as e:
         return jsonify({"error": f"Invalid amount {amount}"}), 400
     
-    LibrarianService(g.Session).issue_fine(user_id, transaction_id, amount, reason)
+    LibrarianService(g.Session).issue_fine(user_id, book_id, amount, reason)
     
     return jsonify({"message": "Fine issued successfully"}), 200
 

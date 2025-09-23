@@ -17,10 +17,12 @@ class LibrarianService(BaseService):
         super().__init__(Session)
 
     @transactional
-    def issue_fine(self, user_id: int, transaction_id: int, amount: Decimal, reason: str) -> Fine:
+    def issue_fine(self, user_id: int, book_id: int, amount: Decimal, reason: str) -> Fine:
         fine_repo = FineRepository(self.session)
+        transaction_repo = BookTransactionRepository(self.session)
 
-        fine = fine_repo.insert_fine(user_id, transaction_id, amount, reason)
+        transaction = transaction_repo.get_transactions(user_id=user_id, book_id=book_id)[0]
+        fine = fine_repo.insert_fine(user_id, transaction.id, amount, reason)
 
         return fine
     
