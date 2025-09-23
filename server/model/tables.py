@@ -105,6 +105,7 @@ class Book(Base):
     author: Mapped[str]
     condition: Mapped[BookCondition]
     on_loan: Mapped[bool] = mapped_column(server_default="False")
+    image: Mapped[Optional[str]]
 
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="book")
 
@@ -115,7 +116,8 @@ class Book(Base):
             description: {self.description}, 
             author: {self.author}, 
             condition: {self.condition},
-            on_loan: {self.on_loan}
+            on_loan: {self.on_loan},
+            image: {self.image}
         """
     
     def to_dict(self):
