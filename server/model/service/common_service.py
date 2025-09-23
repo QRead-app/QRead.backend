@@ -86,9 +86,10 @@ class CommonService(BaseService):
     @transactional
     def get_transaction(self, book_id: int) -> BookTransaction:
         transaction = BookTransactionRepository(self.session).get_transactions(
-            book_id=book_id
+            book_id=book_id,
+            returned=False
         )
-
+        
         if len(transaction) == 0:
             raise RecordNotFoundError()
         
