@@ -93,8 +93,8 @@ class CommonService(BaseService):
         if len(transaction) == 0:
             raise RecordNotFoundError()
         
-        if len(transaction) > 1:
-            raise DatabaseError()
+        # if len(transaction) > 1:
+        #     raise DatabaseError()
         
         return transaction[0];
     
