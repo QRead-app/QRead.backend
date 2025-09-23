@@ -53,6 +53,7 @@ def add_book():
     description = data.get("description")
     author = data.get("author")
     condition = data.get("condition")
+    image = data.get(image)
     
     if title is None:
         return jsonify({"error": "Missing title field"}), 400
@@ -68,7 +69,7 @@ def add_book():
     except ConversionError as e:
         return jsonify({"error": f"Invalid condition {condition}"}), 400
 
-    book = LibrarianService(g.Session).add_book(title, description, author, condition)
+    book = LibrarianService(g.Session).add_book(title, description, author, condition, image)
     
     return jsonify({"message": "Book added successfully", "data": book.to_dict()}), 200
 

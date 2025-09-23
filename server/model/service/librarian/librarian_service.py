@@ -27,9 +27,9 @@ class LibrarianService(BaseService):
         return fine
     
     @transactional
-    def add_book(self, title: str, description: str, author: str, condition: BookCondition) -> Book:
+    def add_book(self, title: str, description: str, author: str, condition: BookCondition, image: str) -> Book:
         book = BookRepository(self.session).insert_book(
-            title, description, author, condition)
+            title, description, author, condition, image)
         
         return book
     
