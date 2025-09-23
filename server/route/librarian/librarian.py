@@ -53,7 +53,7 @@ def add_book():
     description = data.get("description")
     author = data.get("author")
     condition = data.get("condition")
-    image = data.get(image)
+    image = data.get("image")
     
     if title is None:
         return jsonify({"error": "Missing title field"}), 400
