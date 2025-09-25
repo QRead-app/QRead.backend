@@ -181,11 +181,9 @@ def suspend_user():
         return jsonify({"error": f"Invalid id {user_id}"}), 400
 
     try:
-        user = AdminService(g.Session).get_users(id=user_id)
+        AdminService(g.Session).suspend_user(id=user_id)
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
-
-    AdminService(g.Session).suspend_user(user[0])
 
     return jsonify({"message": f"User suspended succesfully"}), 200
 
