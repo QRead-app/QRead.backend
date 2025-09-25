@@ -203,11 +203,10 @@ def reinstate_user():
 
     try:
         user = AdminService(g.Session).get_users(id=user_id)
+        AdminService(g.Session).reinstate_user(id=user_id)
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
     
-    AdminService(g.Session).reinstate_user(user)
-
     return jsonify({"message": f"User reinstated succesfully"}), 200
 
 @admin.route("/user", methods=["DELETE"])

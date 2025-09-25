@@ -141,8 +141,14 @@ class AdminService(BaseService):
         return user
     
     @transactional
-    def reinstate_user(self, user: User) -> User:
-        user.account_state = AccountState.ACTIVE
+    def reinstate_user(self, id: int) -> User:
+        user_repo = UserAccountRepository(self.session)
+
+        user = user_repo.get_user(id=id)
+        if len(user) == 0:
+            raise RecordNotFoundError()
+        
+        user[0].account_state = AccountState.ACTIVE
 
         return user
     
