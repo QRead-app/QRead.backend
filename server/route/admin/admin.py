@@ -227,12 +227,10 @@ def delete_user():
         return jsonify({"error": f"Invalid id {user_id}"}), 400
 
     try:
-        user = AdminService(g.Session).get_users(id=user_id)
+        AdminService(g.Session).delete_user(id=user_id)
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
     
-    AdminService(g.Session).delete_user(user[0])
-
     return jsonify({"message": f"User deleted succesfully"}), 200
 
 @admin.route("/app-setting", methods=["PUT"])

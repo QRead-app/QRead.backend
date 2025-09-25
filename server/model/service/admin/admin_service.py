@@ -141,8 +141,14 @@ class AdminService(BaseService):
         return user
     
     @transactional
-    def delete_user(self, user: User) -> None:
-        UserAccountRepository(self.session).delete_user(user)
+    def delete_user(self, id: int) -> None:
+        user_repo = UserAccountRepository(self.session)
+
+        users = user_repo.get_user(id=id)
+        if len(users) == 0:
+            raise RecordNotFoundError()
+        
+        user_repo.delete_user(users[0])
 
     @transactional
     def update_setting(self, key: str, value: str) -> None:
