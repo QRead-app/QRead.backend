@@ -44,6 +44,7 @@ class CommonService(BaseService):
 
         return user
     
+    @transactional
     def verify_otp(self, id:str, onetimepass: str) -> bool:
         if otp.verify_otp(id, onetimepass):
             return UserAccountRepository(self.session).get_user(
