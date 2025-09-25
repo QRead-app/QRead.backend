@@ -67,7 +67,10 @@ def verify_otp():
     session["session"] = session["authenticate"]
     del session["authenticate"]
 
-    return jsonify({"message": "Login successful"}), 200
+    return jsonify({
+        "message": "Login successful",
+        "data": verification   
+    }), 200
 
 @common.route("/logout", methods=["POST"])
 def logout():
