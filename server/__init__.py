@@ -10,6 +10,7 @@ from server.route.borrower.borrower import borrower
 from server.route.librarian.librarian import librarian
 from server.route.common_route import common
 from server.model.seed import seed_db
+from tests.extensions import test_cache
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.triggers.cron import CronTrigger
 
@@ -28,6 +29,7 @@ def create_app(env: str = None):
     if app.config["ENVIRONMENT"] == 'testing':
         app.config.from_object('server.config.TestingConfig')
         app.config["CONNECTION_STRING"] = app.config["TEST_CONNECTION_STRING"]
+        test_cache.init_app(app)
         
     CORS(
         app,
