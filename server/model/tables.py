@@ -27,7 +27,8 @@ class BookCondition(enum.Enum):
 
 class AccountState(enum.Enum):
     ACTIVE = 1,
-    SUSPENDED = 2
+    SUSPENDED = 2,
+    DELETED = 3
 
 class Base(DeclarativeBase):
     def to_dict(self):
@@ -56,6 +57,7 @@ class User(Base):
     password: Mapped[str]
     account_type: Mapped[AccountType]
     account_state: Mapped[AccountState]
+    suspension_reason: Mapped[Optional[str]]
 
     fines: Mapped[List["Fine"]] = relationship(back_populates="user")
     transactions: Mapped[List["BookTransaction"]] = relationship(back_populates="user")
@@ -68,7 +70,8 @@ class User(Base):
             email: {self.email}, 
             password: {self.password}, 
             account_type: {self.account_type},
-            account_state: {self.account_state}
+            account_state: {self.account_state},
+            suspension_reason: {self.suspension_reason}
         """
     
     def to_dict(self):
