@@ -161,7 +161,8 @@ class AdminService(BaseService):
         if len(users) == 0:
             raise RecordNotFoundError()
         
-        user_repo.delete_user(users[0])
+        users[0].account_state = AccountState.DELETED
+        #user_repo.delete_user(users[0])
 
     @transactional
     def get_setting(self, key: str | None) -> list[AppSettings]:
