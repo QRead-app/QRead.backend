@@ -129,7 +129,7 @@ class AdminService(BaseService):
         return user
 
     @transactional
-    def suspend_user(self, id: int) -> User:
+    def suspend_user(self, id: int, reason: str) -> User:
         user_repo = UserAccountRepository(self.session)
 
         user = user_repo.get_user(id=id)
@@ -137,6 +137,7 @@ class AdminService(BaseService):
             raise RecordNotFoundError()
         
         user[0].account_state = AccountState.SUSPENDED
+        user[0].suspension_reason = reason
 
         return user
     

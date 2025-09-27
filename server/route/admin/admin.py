@@ -171,9 +171,12 @@ def update_account():
 def suspend_user():
     data = request.json
     user_id = data.get("id")
+    reason = data.get("reason")
 
     if user_id is None:
         return jsonify({"error": f"Missing id field"}), 400
+    if reason is None:
+        return jsonify({"error": f"Missing reason field"}), 400
 
     try:
         user_id = User.str_to_int(user_id)
@@ -181,7 +184,7 @@ def suspend_user():
         return jsonify({"error": f"Invalid id {user_id}"}), 400
 
     try:
-        AdminService(g.Session).suspend_user(id=user_id)
+        AdminService(g.Session).suspend_user(id=user_id, reason=reason)
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
 
