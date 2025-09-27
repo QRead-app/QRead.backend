@@ -37,7 +37,10 @@ class CommonService(BaseService):
         user = user[0]
 
         if user.account_state == AccountState.SUSPENDED:
-            raise AuthorizationError()
+            raise AuthorizationError("Suspended")
+        
+        if user.account_state == AccountState.DELETED:
+            raise AuthorizationError("Deleted")
 
         onetimepass = otp.generate_otp(user.id)
         mailer.send_otp(user.email, onetimepass)
@@ -108,7 +111,7 @@ class CommonService(BaseService):
         user = UserAccountRepository(self.session).get_user(
             email = email
         )
-
+        
         if len(user) == 0:
             raise RecordNotFoundError()
         
