@@ -9,7 +9,7 @@ from server.model.repository.book_return_repository import BookReturnRepository
 from server.util.hasher import Hasher
 from ..db import DB
 from flask import Flask
-from .seeds import name, title, description, fine_reason
+from .seeds import name, title, description, fine_reason, images
 from ..tables import *
 from ..repository.user_account_repository import UserAccountRepository
 from ..repository.book_repository import BookRepository
@@ -65,21 +65,58 @@ def seed_db_command():
         names = random.sample(name, 50)
         emails = generate_emails(names)
 
-        for n in range(len(names)):
-            type = random.sample(
-                [type.value for type in AccountType], counts=[1, 3, 5], k=1)[0]
+        users = {
+            "ADMIN": {
+                "ACTIVE": [],
+                "SUSPENDED": [],
+                "DELETED": []
+            },
+            "LIBRARIAN": {
+                "ACTIVE": [],
+                "SUSPENDED": [],
+                "DELETED": []
+            },
+            "BORROWER": {
+                "ACTIVE": [],
+                "SUSPENDED": [],
+                "DELETED": []
+            },
+        }
+        
+        def create_user(name: str, email: str, type: AccountType, state: AccountState):
             user = user_account_repo.insert_user(
-                names[n], 
-                emails[n], 
-                Hasher().hash(names[n].replace(" ", "")), 
-                AccountType(type).name,
-                AccountState.ACTIVE
+                name, 
+                email, 
+                Hasher().hash(name.replace(" ", "")), 
+                type,
+                state
             )
 
-            if AccountType(type).name == AccountType.LIBRARIAN.name:
-                librarian = user
+            users[user.account_type.name][user.account_state.name].append(user)
 
-        user = user_account_repo.insert_user(
+        user_no = 0 
+        create_user(names[user_no], emails[user_no], AccountType.ADMIN, AccountState.ACTIVE)
+        user_no += 1
+        create_user(names[user_no], emails[user_no], AccountType.ADMIN, AccountState.SUSPENDED)
+        user_no += 1
+        create_user(names[user_no], emails[user_no], AccountType.ADMIN, AccountState.DELETED)
+        user_no += 1
+
+        create_user(names[user_no], emails[user_no], AccountType.LIBRARIAN, AccountState.ACTIVE)
+        user_no += 1
+        create_user(names[user_no], emails[user_no], AccountType.LIBRARIAN, AccountState.SUSPENDED)
+        user_no += 1
+        create_user(names[user_no], emails[user_no], AccountType.LIBRARIAN, AccountState.DELETED)
+        user_no += 1
+
+        create_user(names[user_no], emails[user_no], AccountType.BORROWER, AccountState.SUSPENDED)
+        user_no += 1
+        create_user(names[user_no], emails[user_no], AccountType.BORROWER, AccountState.DELETED)
+        user_no += 1
+
+        [create_user(names[no], emails[no], AccountType.BORROWER, AccountState.ACTIVE) for no in range(user_no, 50)]
+
+        user_account_repo.insert_user(
             "yen", 
             "looiyen2002@gmail.com", 
             Hasher().hash("yen"), 
@@ -87,7 +124,7 @@ def seed_db_command():
             "ACTIVE"
         )
 
-        user = user_account_repo.insert_user(
+        user_account_repo.insert_user(
             "hyeri", 
             "daramggi136@gmail.com", 
             Hasher().hash("123456"), 
@@ -95,7 +132,7 @@ def seed_db_command():
             "ACTIVE"
         )
 
-        user = user_account_repo.insert_user(
+        user_account_repo.insert_user(
             "aziz", 
             "azxz1603@gmail.com", 
             Hasher().hash("123456"), 
@@ -108,49 +145,75 @@ def seed_db_command():
 
         titles = random.sample(title, 50)
         descriptions = random.sample(description, 50)
-
+        books = []
         for n in range(len(titles)):
             condition = random.sample(
                 [condition.value for condition in BookCondition], k=1)[0]
             author = name[random.randrange(len(name))]
-            book_repo.insert_book(
+            book = book_repo.insert_book(
                 titles[n], 
                 descriptions[n], 
                 author, 
-                BookCondition(condition).name
+                BookCondition(condition).name,
+                image=random.choice(images)
             )
+            books.append(book)
 
         session.flush()
 
         # Seed book transactions and fines
         print("Seeding transactions, fines & book return...")
-        for n in range(50):
-            transaction_name = names[random.randrange(len(names))]
-            transaction_title = titles[random.randrange(len(titles))]
 
+        def book_manage(book: Book):
             transaction_user = user_account_repo.get_user(
-                email = generate_email(transaction_name))[0]
-            transaction_book = book_repo.get_book(
-                title = transaction_title)[0]
-            due_date = datetime.now() + timedelta(days=14)
+                account_type=AccountType.BORROWER
+            )
+            transaction_user = random.choice(transaction_user)
+            
+            # 20% overdue
+            due = False
+            if (random.randint(1, 5) == 1):
+                due = True
+                due_date = datetime.now() - timedelta(days=2)
+            else: 
+                due_date = datetime.now() + timedelta(days=14)
 
             transaction = transaction_repo.insert_transaction(
-                transaction_user.id, transaction_book.id, due_date)
+                transaction_user.id, book.id, due_date)
             
             session.flush()
 
+            if due:
+                amount = random.randint(10, 50) / Decimal(10)
+                fine_repo.insert_fine(
+                    transaction_user.id, transaction.id, amount, "Overdue")
+                return
+
+            # 24% Not returned and not overdue
             if (random.randint(1, 3) == 1):
-                continue
+                return
 
-            amount = random.randint(10, 50) / Decimal(10)
-            reason = fine_reason[random.randrange(len(fine_reason))]
-            
-            fine_repo.insert_fine(
-                transaction_user.id, transaction.id, amount, reason)
+            # 52% Returned or fined  
+            if (random.randint(1, 2) == 1):
+                amount = random.randint(10, 50) / Decimal(10)
+                reason = fine_reason[random.randrange(len(fine_reason))]
+                
+                fine_repo.insert_fine(
+                    transaction_user.id, transaction.id, amount, reason)
+                return
 
+            librarian = user_account_repo.get_user(
+                account_type=AccountType.LIBRARIAN,
+                account_state = AccountState.ACTIVE
+            )
+            librarian = random.choice(librarian)  
             return_repo.insert_book_return(
                 transaction.id,
                 librarian.id
             )
+            book_manage(book)
+        
+        for book in books:
+            book_manage(book)
 
         print("Committing changes...")
