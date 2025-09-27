@@ -20,7 +20,7 @@ def requires_auth(account_type: AccountType | None):
                 
             if (
                 "session" not in session
-                or auth_type_check(session["session"]["account_type"], auth_type)
+                or not auth_type_check(session["session"]["account_type"], auth_type)
                 or not CommonService(g.Session).verify(
                     session["session"]["id"], 
                     session["session"]["account_type"]

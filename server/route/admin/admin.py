@@ -47,7 +47,7 @@ def get_users():
         
     if email is not None:
         try:
-            email = User.is_email(email)
+            User.is_email(email)
         except ConversionError:
             return jsonify({"error": f"Invalid email {email}"}), 400
         
