@@ -233,6 +233,7 @@ def delete_user():
     return jsonify({"message": f"User deleted succesfully"}), 200
 
 @admin.route("/app-setting", methods=["GET"])
+@requires_auth(AccountType.ADMIN)
 def get_app_setting():
     data = request.args
     key = data.get("key", None)
