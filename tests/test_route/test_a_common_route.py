@@ -1,20 +1,26 @@
 import pytest
 
 from flask import current_app, g, session
-from tests.test_data import test_admin, test_borrower, test_librarian
+from tests.test_data import *
 
 ### ==========================
 ### Common - /login
 ### ==========================
 
 @pytest.mark.parametrize(('email', 'password', 'type', 'error', "code"), (
-    (test_admin.email, test_admin.password, "admi", "Invalid path admi", 404),
-    (None, test_librarian.password, "librarian", 'Missing email field', 400),
-    (test_borrower.email, None, "borrower", 'Missing password field', 400),
-    ("emial.com", test_librarian.password, "librarian", 'Invalid email emial.com', 400),
-    (test_borrower.email, "randomwrongpassword", "borrower", 'Authentication failed', 401)
+    (admin.email, admin.password, "admi", "Invalid path admi", 404),
+    (None, librarian.password, "librarian", 'Missing email field', 400),
+    (borrower.email, None, "borrower", 'Missing password field', 400),
+    ("emial.com", librarian.password, "librarian", 'Invalid email emial.com', 400),
+    (borrower.email, "randomwrongpassword", "borrower", 'Authentication failed', 401),
+    (admin_suspended.email, admin_suspended.password, "admin", "User has been Suspended", 400),
+    (librarian_suspended.email, librarian_suspended.password, "librarian", "User has been Suspended", 400),
+    (borrower_suspended.email, borrower_suspended.password, "borrower", "User has been Suspended", 400),
+    (admin_deleted.email, admin_deleted.password, "admin", "User has been Deleted", 400),
+    (librarian_deleted.email, librarian_deleted.password, "librarian", "User has been Deleted", 400),
+    (borrower_deleted.email, borrower_deleted.password, "borrower", "User has been Deleted", 400)
 ))
-def test_log_in_bad(client, email, password, type, error, code):
+def test_test_log_in_bad(client, email, password, type, error, code):
     response = client.post(
         f"/{type}/login",
         json={
@@ -27,11 +33,11 @@ def test_log_in_bad(client, email, password, type, error, code):
     assert response.status_code == code
 
 @pytest.mark.parametrize(('email', 'password', 'type', 'message', "code"), (
-    (test_librarian.email, test_librarian.password, "librarian", 'Authenticated', 200),
-    (test_admin.email, test_admin.password, "admin", 'Authenticated', 200),
-    (test_borrower.email, test_borrower.password, "borrower", 'Authenticated', 200),
+    (librarian.email, librarian.password, "librarian", 'Authenticated', 200),
+    (admin.email, admin.password, "admin", 'Authenticated', 200),
+    (borrower.email, borrower.password, "borrower", 'Authenticated', 200),
 ))
-def test_log_in_good(client, email, password, type, message, code):
+def test_test_log_in_good(client, email, password, type, message, code):
     response = client.post(
         f"/{type}/login",
         json={
@@ -47,7 +53,7 @@ def test_log_in_good(client, email, password, type, message, code):
 ### Common - /verify-otp
 ### ==========================
 
-def test_verify_otp_bad_havent_login(client):
+def test_test_verify_otp_bad_havent_login(client):
     response = client.post(
         "/verify-otp",
         json = {}
@@ -57,12 +63,12 @@ def test_verify_otp_bad_havent_login(client):
     assert response.status_code == 401
 
 @pytest.mark.parametrize(('type', "email", "password", "otp", "scenario"), (
-    ("borrower", test_borrower.email, test_borrower.password, "999999", 1),
-    ("admin", test_admin.email, test_admin.password, "999999", 1),
-    ("librarian", test_librarian.email, test_librarian.password, "999999", 1),
-    ("borrower", test_borrower.email, test_borrower.password, None, 2),
-    ("admin", test_admin.email, test_admin.password, None, 2),
-    ("librarian", test_librarian.email, test_librarian.password, None, 2),
+    ("borrower", borrower.email, borrower.password, "999999", 1),
+    ("admin", admin.email, admin.password, "999999", 1),
+    ("librarian", librarian.email, librarian.password, "999999", 1),
+    ("borrower", borrower.email, borrower.password, None, 2),
+    ("admin", admin.email, admin.password, None, 2),
+    ("librarian", librarian.email, librarian.password, None, 2),
 ))
 def test_verify_otp_bad_after_login(client, type, email, password, otp, scenario):
     client.post(
@@ -115,8 +121,8 @@ def test_log_out_good_with_session(client_factory, type):
     client.post(
         "/librarian/login",
         json = {
-            "email": test_librarian.email,
-            "password": test_librarian.password
+            "email": librarian.email,
+            "password": librarian.password
         }
     )
 
@@ -149,11 +155,11 @@ def test_get_book_bad(client, id, title, condition, message, code):
 
 def test_get_book_good(client):
     response = client.get(
-        "/book?title=test_title"
+        "/book?title=title"
     )
 
     assert response.json.get("message") == "Book(s) retrieved"
-    assert response.json.get("data")[0].get("title") == "test_title"
+    assert response.json.get("data")[0].get("title") == "title"
     assert response.status_code == 200
 
-    current_app.config["test_book"] = response.json.get("data")[0]
+    current_app.config["book"] = response.json.get("data")[0]
