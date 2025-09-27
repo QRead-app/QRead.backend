@@ -2,6 +2,7 @@ import pytest
 
 from flask import current_app, g, session
 from tests.test_data import *
+from server.util.extensions import mailer as mail
 
 ### ==========================
 ### Common - /login
@@ -20,7 +21,7 @@ from tests.test_data import *
     (librarian_deleted.email, librarian_deleted.password, "librarian", "User has been Deleted", 400),
     (borrower_deleted.email, borrower_deleted.password, "borrower", "User has been Deleted", 400)
 ))
-def test_test_log_in_bad(client, email, password, type, error, code):
+def test_log_in_bad(client, email, password, type, error, code):
     response = client.post(
         f"/{type}/login",
         json={
@@ -37,7 +38,7 @@ def test_test_log_in_bad(client, email, password, type, error, code):
     (admin.email, admin.password, "admin", 'Authenticated', 200),
     (borrower.email, borrower.password, "borrower", 'Authenticated', 200),
 ))
-def test_test_log_in_good(client, email, password, type, message, code):
+def test_log_in_good(client, email, password, type, message, code):
     response = client.post(
         f"/{type}/login",
         json={
@@ -53,7 +54,7 @@ def test_test_log_in_good(client, email, password, type, message, code):
 ### Common - /verify-otp
 ### ==========================
 
-def test_test_verify_otp_bad_havent_login(client):
+def test_verify_otp_bad_havent_login(client):
     response = client.post(
         "/verify-otp",
         json = {}
@@ -163,3 +164,82 @@ def test_get_book_good(client):
     assert response.status_code == 200
 
     current_app.config["book"] = response.json.get("data")[0]
+
+### ==========================
+### Common - /forgot-password
+### ==========================
+
+@pytest.mark.parametrize(("email", "redirect", "error", "code"), (
+    ("wrong_email@eee.com", "redirect", "Email not found", 404),
+    ("wrong_email", "redirect", "Invalid email wrong_email", 400),
+    (None, "redirect", "Missing email field", 400),
+    (borrower.email, None, "Missing redirect field", 400)
+))
+def test_forgot_password_bad(client, email, redirect, error, code):
+    response = client.post(
+        f"/forgot-password",
+        json = {
+            "email": email,
+            "redirect": redirect
+        }
+    )
+
+    assert response.json.get("error") == error
+    assert response.status_code == code
+
+def test_forgot_password_and_reset_password_good(client):
+    with mail.record_messages() as outbox:
+        response = client.post(
+            "/forgot-password",
+            json = {
+                "email": borrower.email,
+                "redirect": "test"
+            }
+        )
+
+        assert response.json.get("message") == "Reset password email sent"
+        assert response.status_code == 200
+
+        secret = outbox[0].body.split("secret=")[1]
+
+        response = client.post(
+            "/reset-password",
+            json = {
+                "secret": secret,
+                "password": "123123"
+            }
+        )
+
+        assert response.json.get("message") == "Password successfully updated"
+        assert response.status_code == 200
+
+        response = client.post(
+            f"/borrower/login",
+            json={
+                "email": borrower.email,
+                "password": "123123"
+            }
+        )
+
+        assert response.json.get("message") == "Authenticated"
+        assert response.status_code == 200
+
+        response = client.post(
+            "/forgot-password",
+            json = {
+                "email": borrower.email,
+                "redirect": "test"
+            }
+        )
+        secret = outbox[0].body.split("secret=")[1]
+
+        response = client.post(
+            "/reset-password",
+            json = {
+                "secret": secret,
+                "password": borrower.password
+            }
+        )
+        
+    
+
