@@ -241,5 +241,73 @@ def test_forgot_password_and_reset_password_good(client):
             }
         )
         
-    
+def test_reset_password_bad_wrong_secret(client):
+    with mail.record_messages() as outbox:
+        response = client.post(
+            "/forgot-password",
+            json = {
+                "email": borrower.email,
+                "redirect": "test"
+            }
+        )
 
+        assert response.json.get("message") == "Reset password email sent"
+        assert response.status_code == 200
+
+        response = client.post(
+            "/reset-password",
+            json = {
+                "secret": "123",
+                "password": "123123"
+            }
+        )
+
+        assert response.json.get("error") == "Wrong secret 123"
+        assert response.status_code == 401
+
+def test_reset_password_bad_missing_secret(client):
+    with mail.record_messages() as outbox:
+        response = client.post(
+            "/forgot-password",
+            json = {
+                "email": borrower.email,
+                "redirect": "test"
+            }
+        )
+
+        assert response.json.get("message") == "Reset password email sent"
+        assert response.status_code == 200
+
+        response = client.post(
+            "/reset-password",
+            json = {
+                "password": "123123"
+            }
+        )
+
+        assert response.json.get("error") == "Missing secret field"
+        assert response.status_code == 400
+
+def test_reset_password_bad_missing_password(client):
+    with mail.record_messages() as outbox:
+        response = client.post(
+            "/forgot-password",
+            json = {
+                "email": borrower.email,
+                "redirect": "test"
+            }
+        )
+        secret = outbox[0].body.split("secret=")[1]
+
+        assert response.json.get("message") == "Reset password email sent"
+        assert response.status_code == 200
+
+        response = client.post(
+            "/reset-password",
+            json = {
+                "secret": secret,
+            }
+        )
+
+        assert response.json.get("error") == "Missing password field"
+        assert response.status_code == 400
