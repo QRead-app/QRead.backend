@@ -1,6 +1,6 @@
 from flask import Blueprint, g, jsonify, request, session
 
-from server.exceptions import ConversionError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
+from server.exceptions import ConversionError, IncorrectCredentialsError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.service.admin.admin_service import AdminService
 from server.model.tables import AccountType, AppSettings, BookTransaction, Fine, User
 from server.route.requires_auth_wrapper import requires_auth
@@ -160,7 +160,11 @@ def update_account():
     except RecordNotFoundError:
         return jsonify({
             "message": "User not found"
-        }), 200
+        }), 404
+    except IncorrectCredentialsError:
+        return jsonify({
+            "message": "Old password is wrong"
+        }), 400
 
     return jsonify({
         "message": "User updated"

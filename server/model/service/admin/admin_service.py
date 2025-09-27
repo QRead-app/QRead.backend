@@ -1,4 +1,4 @@
-from server.exceptions import ConversionError, EmailAlreadyExistsError, RecordNotFoundError
+from server.exceptions import ConversionError, EmailAlreadyExistsError, RecordNotFoundError, IncorrectCredentialsError
 from server.model.repository.app_settings_repository import AppSettingsRepository
 from server.model.repository.book_transaction_repository import BookTransactionRepository
 from server.model.repository.fine_repository import FineRepository
@@ -109,19 +109,24 @@ class AdminService(BaseService):
         newpassword: str = None
     ) -> User:
         user = UserAccountRepository(self.session).get_user(
-            id=id,
-            password = password
+            id=id
         )
 
         if len(user) == 0:
             raise RecordNotFoundError()
+        
+        if newpassword is not None:
+            if password is None:
+                raise IncorrectCredentialsError()
+            hasher.verify(user[0].password, password)
+
+            user[0].password = hasher.hash(newpassword)
         
         for field, val in {
             "name": name,
             "email": email,
             "account_type": account_type,
             "account_state": account_state,
-            "password": newpassword,
         }.items():
             if val is not None:
                 setattr(user, field, val)
