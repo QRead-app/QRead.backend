@@ -54,7 +54,7 @@ class BookRepository(BaseRepository):
         return self.session.execute(stmt).scalars().all()
 
 
-    def insert_book(self, title: str, description: str, author: str, condition: BookCondition, image: str | None) -> Book:
+    def insert_book(self, title: str, description: str, author: str, condition: BookCondition, image: str = None) -> Book:
         book = Book(title = title, description = description, author = author, condition = condition, image = image)
         self.session.add(book)
 
