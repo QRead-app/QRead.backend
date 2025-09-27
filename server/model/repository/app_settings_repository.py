@@ -9,11 +9,18 @@ class AppSettingsRepository(BaseRepository):
     
     def get_setting(
         self, 
-        key: str
+        key: str | None
     ) -> list[AppSettings]:
-        return self.session.execute(
-            select(AppSettings).where(AppSettings.key == key)
-        ).scalars().all()
+        stmt = select(AppSettings)
+
+        filters = []
+        if key is not None:
+            filters.append(AppSettings.key.like(f"%{key}%"))
+
+        if filters: 
+            stmt = stmt.where(*filters)
+
+        return self.session.execute(stmt).scalars().all()
 
     def insert_setting(
         self, 

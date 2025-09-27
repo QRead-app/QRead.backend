@@ -163,6 +163,15 @@ class AdminService(BaseService):
         user_repo.delete_user(users[0])
 
     @transactional
+    def get_setting(self, key: str | None) -> list[AppSettings]:
+        settings = AppSettingsRepository(self.session).get_setting(key)
+        
+        if len(settings) == 0:
+            raise RecordNotFoundError()
+
+        return settings
+
+    @transactional
     def update_setting(self, key: str, value: str) -> None:
         setting = AppSettingsRepository(self.session).get_setting(key)
 

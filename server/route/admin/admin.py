@@ -2,7 +2,7 @@ from flask import Blueprint, g, jsonify, request, session
 
 from server.exceptions import ConversionError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.service.admin.admin_service import AdminService
-from server.model.tables import AccountType, BookTransaction, Fine, User
+from server.model.tables import AccountType, AppSettings, BookTransaction, Fine, User
 from server.route.requires_auth_wrapper import requires_auth
 
 admin = Blueprint('admin', __name__, url_prefix="/admin")
@@ -202,7 +202,6 @@ def reinstate_user():
         return jsonify({"error": f"Invalid id {user_id}"}), 400
 
     try:
-        user = AdminService(g.Session).get_users(id=user_id)
         AdminService(g.Session).reinstate_user(id=user_id)
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
@@ -229,6 +228,23 @@ def delete_user():
         return jsonify({"error": f"User id {user_id} not found"}), 404
     
     return jsonify({"message": f"User deleted succesfully"}), 200
+
+@admin.route("/app-setting", methods=["GET"])
+def get_app_setting():
+    data = request.args
+    key = data.get("key", None)
+    
+    try:
+        settings = AdminService(g.Session).get_setting(key)
+    except RecordNotFoundError:
+        return jsonify({"error": f"Invalid setting key {key}"}), 400
+
+    settings_dict = {setting.key: setting.value for setting in settings}
+    
+    return jsonify({
+        "message": "Setting(s) retrieved",
+        "data": settings_dict
+    }), 200
 
 @admin.route("/app-setting", methods=["PUT"])
 @requires_auth(AccountType.ADMIN)
