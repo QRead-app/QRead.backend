@@ -32,17 +32,17 @@ def client(app):
 def client_factory(app):
     def _get_client(type: str):
         if type == "borrower":
-            email = test_borrower.email
-            password = test_borrower.password
+            email = borrower.email
+            password = borrower.password
         elif type == "admin":
-            email = test_admin.email
-            password = test_admin.password
+            email = admin.email
+            password = admin.password
         elif type == "librarian":
-            email = test_librarian.email
-            password = test_librarian.password
+            email = librarian.email
+            password = librarian.password
         elif type == "borrower2":
-            email = test_borrower_2.email
-            password = test_borrower_2.password
+            email = borrower_2.email
+            password = borrower_2.password
             type = "borrower"
         else:
             raise Exception("Invalid client type")
@@ -86,36 +86,34 @@ def app_configuration(app, runner):
             hasher = Hasher()
 
             # Insert test users
-            user_repo.insert_user(
-                name = test_borrower.name,
-                email = test_borrower.email,
-                password = hasher.hash(test_borrower.password),
-                type = test_borrower.account_type
-            )
-            user_repo.insert_user(
-                name = test_borrower_2.name,
-                email = test_borrower_2.email,
-                password = hasher.hash(test_borrower_2.password),
-                type = test_borrower_2.account_type
-            )
-            user_repo.insert_user(
-                name = test_librarian.name,
-                email = test_librarian.email,
-                password = hasher.hash(test_librarian.password),
-                type = test_librarian.account_type
-            )
-            user_repo.insert_user(
-                name = test_admin.name,
-                email = test_admin.email,
-                password = hasher.hash(test_admin.password),
-                type = test_admin.account_type
-            )
+            def insert_user(user: User):
+                if user.account_state is None:
+                    user.account_state = AccountState.ACTIVE
 
+                user_repo.insert_user(
+                    name = user.name,
+                    email = user.email,
+                    password = hasher.hash(user.password),
+                    type = user.account_type,
+                    state = user.account_state
+                )
+
+            insert_user(borrower)
+            insert_user(borrower_deleted)
+            insert_user(borrower_suspended)
+            insert_user(borrower_2)
+            insert_user(admin)
+            insert_user(admin_suspended)
+            insert_user(admin_deleted)
+            insert_user(librarian)
+            insert_user(librarian_suspended)
+            insert_user(librarian_deleted)
+            
             book_repo.insert_book(
-                title = test_book.title,
-                description = test_book.description,
-                author = test_book.author,
-                condition = test_book.condition
+                title = book.title,
+                description = book.description,
+                author = book.author,
+                condition = book.condition
             )
 
         yield app
