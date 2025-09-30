@@ -36,4 +36,4 @@ class AppSettingsRepository(BaseRepository):
         self.session.delete(setting)  
 
     def truncate_table(self) -> None:
-        self.session.execute(text("TRUNCATE TABLE app_settings CASCADE"))
+        self.session.execute(text("TRUNCATE TABLE app_settings RESTART IDENTITY CASCADE"))

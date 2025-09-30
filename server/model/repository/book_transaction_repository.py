@@ -50,4 +50,4 @@ class BookTransactionRepository(BaseRepository):
         return transaction
     
     def truncate_table(self) -> None:
-        self.session.execute(text("TRUNCATE TABLE book_transaction CASCADE"))
+        self.session.execute(text("TRUNCATE TABLE book_transaction RESTART IDENTITY CASCADE"))

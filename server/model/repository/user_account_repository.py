@@ -58,4 +58,4 @@ class UserAccountRepository(BaseRepository):
         self.session.delete(user)   
 
     def truncate_table(self) -> None:
-        self.session.execute(text("TRUNCATE TABLE user_account CASCADE"))
+        self.session.execute(text("TRUNCATE TABLE user_account RESTART IDENTITY CASCADE"))

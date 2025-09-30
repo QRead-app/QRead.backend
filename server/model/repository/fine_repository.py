@@ -61,4 +61,4 @@ class FineRepository(BaseRepository):
         return fine
     
     def truncate_table(self) -> None:
-        self.session.execute(text("TRUNCATE TABLE fine CASCADE"))
+        self.session.execute(text("TRUNCATE TABLE fine RESTART IDENTITY CASCADE"))
