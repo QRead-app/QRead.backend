@@ -114,6 +114,7 @@ class AdminService(BaseService):
 
         if len(user) == 0:
             raise RecordNotFoundError()
+        user = user[0]
         
         if newpassword is not None:
             if password is None:
