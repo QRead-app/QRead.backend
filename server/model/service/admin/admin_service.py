@@ -115,13 +115,13 @@ class AdminService(BaseService):
         if len(user) == 0:
             raise RecordNotFoundError()
         user = user[0]
-        
+
         if newpassword is not None:
             if password is None:
                 raise IncorrectCredentialsError()
-            hasher.verify(user[0].password, password)
+            hasher.verify(user.password, password)
 
-            user[0].password = hasher.hash(newpassword)
+            user.password = hasher.hash(newpassword)
         
         for field, val in {
             "name": name,
