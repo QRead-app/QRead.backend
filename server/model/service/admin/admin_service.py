@@ -137,8 +137,8 @@ class AdminService(BaseService):
         for field, val in {
             "name": name,
             "email": email,
-            "account_type": account_type,
-            #"account_state": account_state,
+            #"account_type": account_type,
+            "account_state": account_state,
         }.items():
             if val is not None:
                 setattr(user, field, val)
