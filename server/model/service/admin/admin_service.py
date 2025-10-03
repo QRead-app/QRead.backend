@@ -103,8 +103,8 @@ class AdminService(BaseService):
         id: int = None, 
         name: str = None,
         email: str = None,
-        account_type: AccountType = None,
-        #account_state: AccountState = None,
+        #account_type: AccountType = None,
+        account_state: AccountState = None,
         password: str = None,
         newpassword: str = None
     ) -> User:
