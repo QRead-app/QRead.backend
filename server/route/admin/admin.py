@@ -115,8 +115,7 @@ def update_account():
     data = request.args
     id = data.get("id") 
     name = data.get("name") 
-    email = data.get("email") 
-    account_type = data.get("type") 
+    email = data.get("email")
     account_state = data.get("state")
     password = data.get("password")
     newpassword = data.get("newpassword")
@@ -136,11 +135,11 @@ def update_account():
         except ConversionError:
             return jsonify({"error": f"Invalid email {email}"}), 400
         
-    if account_type is not None:
-        try:
-            account_type = User.str_to_account_type(account_type)
-        except ConversionError:
-            return jsonify({"error": f"Invalid account_type {account_type}"}), 400
+    # if account_type is not None:
+    #     try:
+    #         account_type = User.str_to_account_type(account_type)
+    #     except ConversionError:
+    #         return jsonify({"error": f"Invalid account_type {account_type}"}), 400
         
     if account_state is not None:
         try:
@@ -153,7 +152,7 @@ def update_account():
             id = id,
             name = name,
             email = email,
-            account_type = account_type,
+            # account_type = account_type,
             account_state = account_state,
             password = password,
             newpassword = newpassword

@@ -104,7 +104,7 @@ class AdminService(BaseService):
         name: str = None,
         email: str = None,
         account_type: AccountType = None,
-        account_state: AccountState = None,
+        #account_state: AccountState = None,
         password: str = None,
         newpassword: str = None
     ) -> User:
@@ -135,7 +135,7 @@ class AdminService(BaseService):
             "name": name,
             "email": email,
             "account_type": account_type,
-            "account_state": account_state,
+            #"account_state": account_state,
         }.items():
             if val is not None:
                 setattr(user, field, val)
