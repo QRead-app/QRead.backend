@@ -123,6 +123,14 @@ class AdminService(BaseService):
 
             user.password = hasher.hash(newpassword)
         
+        if (
+            email is not None
+            and user.account_type == "ADMIN" 
+        ):
+            code = otp.generate_update_email_otp(email)
+            mailer.send_otp(email, code)
+            return user
+
         for field, val in {
             "name": name,
             "email": email,
@@ -133,6 +141,16 @@ class AdminService(BaseService):
                 setattr(user, field, val)
 
         return user
+    
+    @transactional
+    def verify_otp_email(self, code: str, id: int) -> None:
+        new_email = otp.verify_update_email_otp(code)
+
+        user = UserAccountRepository(self.session).get_user(
+            id=id
+        )[0]
+
+        user.email = new_email
 
     @transactional
     def suspend_user(self, id: int, reason: str) -> User:

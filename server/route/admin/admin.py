@@ -2,6 +2,7 @@ from flask import Blueprint, g, jsonify, request, session
 
 from server.exceptions import ConversionError, IncorrectCredentialsError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.service.admin.admin_service import AdminService
+from server.model.service.common_service import CommonService
 from server.model.tables import AccountType, AppSettings, BookTransaction, Fine, User
 from server.route.requires_auth_wrapper import requires_auth
 
@@ -168,6 +169,24 @@ def update_account():
 
     return jsonify({
         "message": "User updated"
+    }), 200
+
+@admin.route("/email", methods=["PUT"])
+@requires_auth(AccountType.ADMIN)
+def update_email():
+    data = request.args
+    otp = data.get("otp") 
+    
+    if otp is None:
+        return jsonify({"error": "Missing otp field"}), 400
+
+    try:
+        AdminService(g.Session).verify_otp_email(otp, g.session["session"]["id"])
+    except IncorrectCredentialsError:
+        return jsonify({"error": "Wrong OTP"}), 401
+    
+    return jsonify({
+        "message": "Email updated"
     }), 200
 
 @admin.route("/suspend-user", methods=["POST"])

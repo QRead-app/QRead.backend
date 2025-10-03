@@ -28,6 +28,12 @@ class OTP:
         forgot_password_cache.set(secure_string, email)
 
         return secure_string
+    
+    def generate_update_email_otp(self, email: str) -> str:
+        otp = ''.join(secrets.choice("0123456789") for _ in range(6))
+        otp_cache.set(otp, email)
+
+        return otp
 
     def verify_otp(self, user_id: int, otp: str) -> bool:
         cached = otp_cache.get(user_id)
@@ -61,5 +67,15 @@ class OTP:
         otp_cache.delete(secret)
 
         return cached
+    
+    def verify_update_email_otp(self, otp: str) -> str:
+        email = otp_cache.get(otp)
+
+        if email is None:
+            raise IncorrectCredentialsError()
+        
+        otp_cache.delete(otp)
+
+        return email
     
 otp = OTP()
