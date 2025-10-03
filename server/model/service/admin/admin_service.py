@@ -116,7 +116,10 @@ class AdminService(BaseService):
             raise RecordNotFoundError()
         user = user[0]
 
-        if newpassword is not None:
+        if (
+            newpassword is not None
+            and user.account_type == "ADMIN"
+        ):
             if password is None:
                 raise IncorrectCredentialsError()
             hasher.verify(user.password, password)
