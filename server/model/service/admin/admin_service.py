@@ -118,7 +118,7 @@ class AdminService(BaseService):
 
         if (
             newpassword is not None
-            and user.account_type == "ADMIN"
+            and user.account_type.name == "ADMIN"
         ):
             if password is None:
                 raise IncorrectCredentialsError()
@@ -177,6 +177,7 @@ class AdminService(BaseService):
             raise RecordNotFoundError()
         
         user[0].account_state = AccountState.ACTIVE
+        user[0].suspension_reason = None
 
         return user
     
