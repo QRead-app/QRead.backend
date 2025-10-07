@@ -7,6 +7,7 @@ from server.util.extensions import otp_cache, mailer
 from server.util.hasher import Hasher
 from tests.test_data import *
 from server import create_app
+from tests.extensions import test_cache
 from server.model.repository.user_account_repository import UserAccountRepository
 
 @pytest.fixture(scope="session")
@@ -90,13 +91,15 @@ def app_configuration(app, runner):
                 if user.account_state is None:
                     user.account_state = AccountState.ACTIVE
 
-                user_repo.insert_user(
+                inserted = user_repo.insert_user(
                     name = user.name,
                     email = user.email,
                     password = hasher.hash(user.password),
                     type = user.account_type,
                     state = user.account_state
                 )
+                session.flush()
+                test_cache.set(f'{user.name}_id', inserted.id)
 
             insert_user(borrower)
             insert_user(borrower_deleted)

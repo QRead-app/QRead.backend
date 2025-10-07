@@ -236,22 +236,230 @@ def test_get_user_by_id_good(client_factory, type):
 ### Admin - PUT /user
 ### ==========================
 
+@pytest.mark.parametrize(
+    ("id", "name", "email", "state", "password", "newpassword", "error", "status_code"), (
+        ("test", "test2", None, None, None, None, "Invalid id test", 400),
+        (123123123, "test2", None, None, None, None, "User not found", 404),
+        ("borrower", None, "test", None, None, None, "Invalid email test", 400),
+        ("borrower", None, None, "TEST", None, None, "Invalid account_state TEST", 400),
+        (None, None, None, None, "testwrongpass121", "newpass", "Old password is wrong", 400)
+    )
+)
+def test_update_user_bad(client_factory, id, name, email, state, password, newpassword, error, status_code):
+    client = client_factory("admin")
+
+    if id == "borrower":
+        id = test_cache.get("borrower_id")
+
+    url = ''
+    if id is not None: url = url + f'id={id}&'
+    if name is not None: url = url + f'name={name}&'
+    if email is not None: url = url + f'email={email}&'
+    if state is not None: url = url + f'state={state}&'
+    if password is not None: url = url + f'password={password}&'
+    if newpassword is not None: url = url + f'&newpassword={newpassword}'
+
+    response = client.put(
+        f"""/admin/user?{url}"""
+    )
+
+    assert response.json.get("error") == error
+    assert response.status_code == status_code
+
+def test_update_user_details_good(client_factory):
+    client = client_factory("admin")
+
+    id = test_cache.get("borrower_2_id")
+
+    response = client.put(
+        f"""/admin/user?id={id}&name=testtest_borrower&email=test_borrower_2@email.com&state=DELETED"""
+    )
+
+    assert response.json.get("message") == "User updated"
+    assert response.status_code == 200
+
+    response = client.get(
+        f"/admin/users?id={id}",
+    )
+
+    user = response.json.get("data")[0].get("user")
+    assert user.get("name") == "testtest_borrower"
+    assert user.get("email") == "test_borrower_2@email.com"
+    assert user.get("account_state") == "DELETED"
+
+    client.put(
+        f"""/admin/user?id={id}&name={borrower_2.name}&email={borrower_2.email}&state={borrower_2.account_state}"""
+    )
+
+
 ### ==========================
 ### Admin - DELETE /user
 ### ==========================
+
+@pytest.mark.parametrize(
+    ("id", "error", "status_code"), (
+        (None, "Missing id field", 400),
+        (12312312, "User id 12312312 not found", 404),
+        ('abc', "Invalid id abc", 400)
+    )
+)
+def test_delete_user_bad(client_factory, id, error, status_code):
+    client = client_factory("admin")
+
+    if id is not None: url = f'id={id}'
+    else: url = ''
+
+    response = client.delete(
+        f"""/admin/user?{url}"""
+    )
+
+    assert response.json.get("error") == error
+    assert response.status_code == status_code
+
+def test_delete_user_good(client_factory):
+    client = client_factory('admin')
+
+    response = client.delete(
+        f'/admin/user?id={test_cache.get("borrower_2_id")}'
+    )
+
+    assert response.json.get('message') == 'User deleted successfully'
+    assert response.status_code == 200
+
+    client.put(
+        f"""/admin/user?id={test_cache.get("borrower_2_id")}&state={borrower_2.account_state}"""
+    )
 
 ### ==========================
 ### Admin - /suspend-user
 ### ==========================
 
+@pytest.mark.parametrize(
+    ("id", "reason", "error", "status_code"), (
+        (None, "test reason", "Missing id field", 400),
+        ("borrower_2", None, "Missing reason field", 400),
+        ("test", "test", "Invalid id test", 400),
+        (123123, "reason", "User id 123123 not found", 404)
+    )
+)
+def test_suspend_user_bad(client_factory, id, reason, error, status_code):
+    client = client_factory("admin")
+
+    if id == "borrower_2":
+        id = test_cache.get("borrower_2_id")
+
+    response = client.post(
+        f"""/admin/suspend-user""",
+        json = {
+            "id": id,
+            "reason": reason
+        }
+    )
+
+    assert response.json.get("error") == error
+    assert response.status_code == status_code
+
+def test_suspend_user_good(client_factory):
+    client = client_factory('admin')
+
+    response = client.post(
+        f'/admin/suspend-user',
+        json = {
+            'id': test_cache.get('borrower_2_id'),
+            'reason': 'testreason'
+        }
+    )
+
+    assert response.json.get('message') == 'User suspended successfully'
+    assert response.status_code == 200
+
 ### ==========================
 ### Admin - /reinstate-user
 ### ==========================
+
+@pytest.mark.parametrize(
+    ("id", "error", "status_code"), (
+        (None, "Missing id field", 400),
+        ("test", "Invalid id test", 400),
+        (123123, "User id 123123 not found", 404)
+    )
+)
+def test_reinstate_user_bad(client_factory, id, error, status_code):
+    client = client_factory("admin")
+
+    response = client.post(
+        f"""/admin/reinstate-user""",
+        json = {
+            "id": id
+        }
+    )
+
+    assert response.json.get("error") == error
+    assert response.status_code == status_code
+
+def test_reinstate_user_good(client_factory):
+    client = client_factory('admin')
+
+    response = client.post(
+        f'/admin/reinstate-user',
+        json = {
+            "id": test_cache.get("borrower_2_id")
+        }
+    )
+
+    assert response.json.get('message') == 'User reinstated successfully'
+    assert response.status_code == 200
 
 ### ==========================
 ### Admin - GET /app-setting
 ### ==========================
 
+def test_get_setting_good(client_factory):
+    client = client_factory('admin')
+
+    response = client.get(
+        '/admin/app-setting'
+    )
+
+    assert 'reminder_every_x_days' in response.json.get('data')
+    assert 'reminder_x_days_before_due' in response.json.get('data')
+    assert response.status_code == 200
+
 ### ==========================
 ### Admin - PUT /app-setting
 ### ==========================
+
+@pytest.mark.parametrize(
+    ("key", "value", "error", "status_code"), (
+        (None, "15", "Missing key field", 400),
+        ("reminder_every_x_days", None, "Missing value field", 400),
+        ("test", "15", "Key test not found", 404)
+    )
+)
+def test_update_setting_bad(client_factory, key, value, error, status_code):
+    client = client_factory("admin")
+
+    response = client.put(
+        f"""/admin/app-setting""",
+        json = {
+            'key': key,
+            'value': value
+        }
+    )
+
+    assert response.json.get("error") == error
+    assert response.status_code == status_code
+
+def test_update_setting_good(client_factory):
+    client = client_factory("admin")
+
+    response = client.put(
+        f"""/admin/app-setting""",
+        json = {
+            'key': 'reminder_every_x_days',
+            'value': '15'
+        }
+    )
+
+    assert response.json.get("message") == 'Setting updated successfully'
+

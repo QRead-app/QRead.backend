@@ -206,7 +206,7 @@ class AdminService(BaseService):
         setting = AppSettingsRepository(self.session).get_setting(key)
 
         if len(setting) == 0:
-            RecordNotFoundError()
+            raise RecordNotFoundError()
 
         if (
             key == "reminder_every_x_days"

@@ -130,9 +130,7 @@ def update_account():
         id = session["session"]["id"]
         
     if email is not None:
-        try:
-            email = User.is_email(email)
-        except ConversionError:
+        if not User.is_email(email):
             return jsonify({"error": f"Invalid email {email}"}), 400
         
     # if account_type is not None:
@@ -159,11 +157,11 @@ def update_account():
         )
     except RecordNotFoundError:
         return jsonify({
-            "message": "User not found"
+            "error": "User not found"
         }), 404
     except IncorrectCredentialsError:
         return jsonify({
-            "message": "Old password is wrong"
+            "error": "Old password is wrong"
         }), 400
 
     return jsonify({
@@ -210,16 +208,16 @@ def suspend_user():
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
 
-    return jsonify({"message": f"User suspended succesfully"}), 200
+    return jsonify({"message": f"User suspended successfully"}), 200
 
 @admin.route("/reinstate-user", methods=["POST"])
 @requires_auth(AccountType.ADMIN)
 def reinstate_user():
     data = request.json
     user_id = data.get("id")
-
+    
     if user_id is None:
-        return jsonify({"error": f"Missing id field"})
+        return jsonify({"error": f"Missing id field"}), 400
 
     try:
         user_id = User.str_to_int(user_id)
@@ -231,7 +229,7 @@ def reinstate_user():
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
     
-    return jsonify({"message": f"User reinstated succesfully"}), 200
+    return jsonify({"message": f"User reinstated successfully"}), 200
 
 @admin.route("/user", methods=["DELETE"])
 @requires_auth(AccountType.ADMIN)
@@ -240,7 +238,7 @@ def delete_user():
     user_id = data.get("id")
 
     if user_id is None:
-        return jsonify({"error": f"Missing id field"})
+        return jsonify({"error": f"Missing id field"}), 400
 
     try:
         user_id = User.str_to_int(user_id)
@@ -252,7 +250,7 @@ def delete_user():
     except RecordNotFoundError:
         return jsonify({"error": f"User id {user_id} not found"}), 404
     
-    return jsonify({"message": f"User deleted succesfully"}), 200
+    return jsonify({"message": f"User deleted successfully"}), 200
 
 @admin.route("/app-setting", methods=["GET"])
 @requires_auth(AccountType.ADMIN)
@@ -290,4 +288,4 @@ def update_app_setting():
     except RecordNotFoundError:
         return jsonify({"error": f"Key {key} not found"}), 404
 
-    return jsonify({"message": f"Setting updated succesfully"}), 200
+    return jsonify({"message": f"Setting updated successfully"}), 200
