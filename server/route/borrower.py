@@ -1,7 +1,7 @@
 from flask import Blueprint, g, jsonify, request, session
 from server.exceptions import BookBorrowingError, ConversionError, DatabaseError, EmailAlreadyExistsError, RecordNotFoundError
 from server.model.tables import AccountType, Book, Fine, User
-from server.model.service.borrower.borrower_service import BorrowerService
+from server.model.service.borrower_service import BorrowerService
 from server.route.requires_auth_wrapper import requires_auth
 
 borrower = Blueprint('borrower', __name__, url_prefix="/borrower")

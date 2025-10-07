@@ -5,9 +5,9 @@ from server.model.service.notification_service import due_date_reminder
 from server.util.extensions import otp_cache, mailer, forgot_password_cache, new_librarian_cache, scheduler
 from server.exceptions import DatabaseError
 from server.model.db import DB
-from server.route.admin.admin import admin
-from server.route.borrower.borrower import borrower
-from server.route.librarian.librarian import librarian
+from server.route.admin import admin
+from server.route.borrower import borrower
+from server.route.librarian import librarian
 from server.route.common_route import common
 from server.model.seed import seed_db
 from tests.extensions import test_cache

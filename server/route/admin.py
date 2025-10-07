@@ -1,7 +1,7 @@
 from flask import Blueprint, g, jsonify, request, session
 
 from server.exceptions import ConversionError, IncorrectCredentialsError, EmailAlreadyExistsError, RecordNotFoundError
-from server.model.service.admin.admin_service import AdminService
+from server.model.service.admin_service import AdminService
 from server.model.service.common_service import CommonService
 from server.model.tables import AccountType, AppSettings, BookTransaction, Fine, User
 from server.route.requires_auth_wrapper import requires_auth

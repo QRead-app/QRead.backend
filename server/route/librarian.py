@@ -2,7 +2,7 @@ from flask import Blueprint, g, jsonify, request, session
 
 from server.exceptions import BookBorrowingError, ConversionError, RecordNotFoundError
 from server.model.service.common_service import CommonService
-from server.model.service.librarian.librarian_service import LibrarianService
+from server.model.service.librarian_service import LibrarianService
 from server.model.tables import AccountType, Book, Fine, User
 from server.route.requires_auth_wrapper import requires_auth
 
@@ -184,17 +184,17 @@ def return_book():
 @requires_auth(AccountType.LIBRARIAN)
 def update_account():
     data = request.json
-    id = data.get("id") 
-    # name = data.get("name") 
-    # email = data.get("email") 
+    # id = data.get("id") 
+    # # name = data.get("name") 
+    # # email = data.get("email") 
     password = data.get("password")
     newpassword = data.get("newpassword")
 
-    if id is not None:
-        try:
-            id = User.str_to_int(id)
-        except ConversionError:
-            return jsonify({"error": f"Invalid id {id}"}), 400
+    # if id is not None:
+    #     try:
+    #         id = User.str_to_int(id)
+    #     except ConversionError:
+    #         return jsonify({"error": f"Invalid id {id}"}), 400
         
     if id is None:
         id = session["session"]["id"]
