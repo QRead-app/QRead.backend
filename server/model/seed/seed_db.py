@@ -180,9 +180,11 @@ def seed_db_command():
 
             transaction = transaction_repo.insert_transaction(
                 transaction_user.id, book.id, due_date)
+            book = book_repo.get_book(id=book.id)[0]
             
             session.flush()
 
+            book.on_loan = True
             if due:
                 amount = random.randint(10, 50) / Decimal(10)
                 fine_repo.insert_fine(
@@ -211,6 +213,11 @@ def seed_db_command():
                 transaction.id,
                 librarian.id
             )
+            book.on_loan = False
+
+            if (random.randint(1, 3) == 1):
+                transaction.returned = True
+                return;
             book_manage(book)
         
         for book in books:
