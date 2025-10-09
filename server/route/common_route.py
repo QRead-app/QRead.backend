@@ -122,9 +122,10 @@ def get_book():
 
         borrower = []
         for book in result:
-            transaction = CommonService(g.Session).get_transaction(book.id)
+            transactions = CommonService(g.Session).get_transaction(book.id, False)
             if (book.on_loan):
-                borrower.append(transaction.user_id)
+                borrowed_by = CommonService(g.Session).get_transaction(book.id, True)
+                borrower.append(borrowed_by[0].user_id)
             else:
                 borrower.append('')
 
@@ -136,6 +137,13 @@ def get_book():
         book_dict = book.to_dict()
         book_dict["borrower_id"] = borrower[n]
         books.append(book_dict)
+
+        if not transaction[n]:
+            continue
+
+        for transaction in transactions[n]:
+            transaction_dict = transaction.to_dict()
+            books.append(transaction_dict)
 
     return jsonify({
         "message": "Book(s) retrieved",

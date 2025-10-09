@@ -92,18 +92,25 @@ class CommonService(BaseService):
         return books
     
     @transactional
-    def get_transaction(self, book_id: int) -> BookTransaction:
-        transaction = BookTransactionRepository(self.session).get_transactions(
-            book_id=book_id
-        )
+    def get_transaction(self, book_id: int, all: bool) -> list[BookTransaction]:
         
-        if len(transaction) == 0:
-            raise RecordNotFoundError()
+        if all:
+            transaction = BookTransactionRepository(self.session).get_transactions(
+                book_id=book_id
+            )
+        else:
+            transaction = BookTransactionRepository(self.session).get_transactions(
+                book_id=book_id,
+                returned=False
+            )
         
-        # if len(transaction) > 1:
-        #     raise DatabaseError()
+            if len(transaction) == 0:
+                raise RecordNotFoundError()
         
-        return transaction[0];
+            if len(transaction) > 1:
+                raise DatabaseError()
+        
+        return transaction;
     
     @transactional
     def forgot_password(self, email: str, redirect_url: str) -> None:
