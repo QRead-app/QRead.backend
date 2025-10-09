@@ -111,7 +111,7 @@ def get_book():
             return jsonify({"error": f"Invalid on_load {on_loan}"}), 400
 
     try:
-        result = CommonService(g.Session).get_book(
+        books, borrowers, transactions = CommonService(g.Session).get_book(
             id,
             title,
             description,
@@ -119,36 +119,30 @@ def get_book():
             condition,
             on_loan
         )
-
-        borrower = []
-        transactions = []
-        for book in result:
-            transactions.append(CommonService(g.Session).get_transaction(book.id, True))
-            if (book.on_loan):
-                borrowed_by = CommonService(g.Session).get_transaction(book.id, False)
-                borrower.append(borrowed_by[0].user_id)
-            else:
-                borrower.append('')
-
     except RecordNotFoundError:
         return jsonify({"message": "No book found"}), 200
     
-    books: list[Book] = []
-    for n, book in enumerate(result):
+    data = []
+    for n, book in enumerate(books):
         book_dict = book.to_dict()
-        book_dict["borrower_id"] = borrower[n]
-        books.append(book_dict)
         
-        if not transactions[n]:
-            continue
+        book_dict["borrower_id"] = borrowers[n][0]
+        book_dict["borrower_name"] = borrowers[n][1]
 
+        transactions_dict = []
         for transaction in transactions[n]:
-            transaction_dict = transaction.to_dict()
-            books[n]["transactions"] = transaction_dict
+            if transaction == []: continue
+            
+            transaction_dict = transaction[0].to_dict()
+            transaction_dict['borrower'] = transaction[1]
+            transactions_dict.append(transaction_dict)
+        book_dict['transactions'] = transactions_dict
+
+        data.append(book_dict)
 
     return jsonify({
         "message": "Book(s) retrieved",
-        "data": books
+        "data": data
     }), 200
 
 @common.route("/forgot-password", methods=["POST"])

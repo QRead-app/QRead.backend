@@ -76,7 +76,8 @@ class CommonService(BaseService):
         author: str | None = None, 
         condition: BookCondition | None = None,
         on_loan: bool | None = None
-    ) -> list[Book]:
+    ) -> list:
+        user_repo = UserAccountRepository(self.session)
         books = BookRepository(self.session).get_book(
             id,
             title,
@@ -88,28 +89,50 @@ class CommonService(BaseService):
 
         if len(books) == 0:
             raise RecordNotFoundError()
+        
+        borrowers = []
+        transactions = []
+        for book in books:
+            try:
+                all_transactions = self.get_transaction(book.id, True)
+                current_transactions = []
 
-        return books
+                for transaction in all_transactions:
+                    user = user_repo.get_user(id=transaction.user_id)[0]
+                    current_transactions.append([transaction, user.name])
+                    
+                transactions.append(current_transactions)
+
+            except RecordNotFoundError:
+                transactions.append([])
+            
+            if (book.on_loan):
+                borrowed_by = self.get_transaction(book.id, False)[0]
+                user = user_repo.get_user(id=borrowed_by.user_id)[0]
+                borrowers.append([borrowed_by.user_id, user.name])
+            else:
+                borrowers.append('')
+
+        return books, borrowers, transactions
     
     @transactional
-    def get_transaction(self, book_id: int, all: bool) -> list[BookTransaction]:
-        if all:
-            transaction = BookTransactionRepository(self.session).get_transactions(
+    def get_transaction(self, book_id: int, include_returned: bool) -> list:
+        if include_returned:
+            transactions = BookTransactionRepository(self.session).get_transactions(
                 book_id=book_id
             )
         else:
-            transaction = BookTransactionRepository(self.session).get_transactions(
+            transactions = BookTransactionRepository(self.session).get_transactions(
                 book_id=book_id,
                 returned=False
             )
-        
-            if len(transaction) == 0:
-                raise RecordNotFoundError()
-        
-            if len(transaction) > 1:
+            if len(transactions) > 1:
                 raise DatabaseError()
+            
+        if len(transactions) == 0:
+            raise RecordNotFoundError()
         
-        return transaction;
+        return transactions;
     
     @transactional
     def forgot_password(self, email: str, redirect_url: str) -> None:

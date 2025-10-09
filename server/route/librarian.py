@@ -73,25 +73,25 @@ def add_book():
     
     return jsonify({"message": "Book added successfully", "data": book.to_dict()}), 200
 
-@librarian.route("/books", methods=["GET"])
-@requires_auth(AccountType.LIBRARIAN)
-def search_books():
-    data = request.args
-    search = data.get("search")
+# @librarian.route("/books", methods=["GET"])
+# @requires_auth(AccountType.LIBRARIAN)
+# def search_books():
+#     data = request.args
+#     search = data.get("search")
 
-    try:
-        books = LibrarianService(g.Session).search_books(search)
-    except RecordNotFoundError:
-        return jsonify({"message": "No book found"}), 200
+#     try:
+#         [books, transactions] = LibrarianService(g.Session).search_books(search)
+#     except RecordNotFoundError:
+#         return jsonify({"message": "No book found"}), 200
     
-    result = []
-    for book in books:
-        result.append(book.to_dict())
+#     result = []
+#     for i in enumerate(books):
+#         result.append(books[i].to_dict())
 
-    return jsonify({
-        "message": "Book search success",
-        "data": data   
-    }), 200
+#     return jsonify({
+#         "message": "Book search success",
+#         "data": data   
+#     }), 200
 
 @librarian.route("/book", methods=["DELETE"])
 @requires_auth(AccountType.LIBRARIAN)
