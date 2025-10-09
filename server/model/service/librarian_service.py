@@ -39,8 +39,15 @@ class LibrarianService(BaseService):
 
         if len(books) == 0:
             raise RecordNotFoundError()
+        
+        transactions = []
+        for book in books:
+            transactions.append(BookTransactionRepository(self.sessoin)
+                                .get_transactions(
+                                    book_id=books[books[0].id]
+                                ))
 
-        return books
+        return books, transactions
     
     @transactional
     def remove_book(self, book_id: int) -> None:
