@@ -122,11 +122,11 @@ def get_book():
 
         borrower = []
         for book in result:
+            transaction = CommonService(g.Session).get_transaction(book.id)
             if (book.on_loan):
-                transaction = CommonService(g.Session).get_transaction(book.id)
                 borrower.append(transaction.user_id)
             else:
-                borrower.append(' ')
+                borrower.append('')
 
     except RecordNotFoundError:
         return jsonify({"message": "No book found"}), 200
