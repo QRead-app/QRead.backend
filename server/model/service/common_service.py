@@ -93,7 +93,6 @@ class CommonService(BaseService):
     
     @transactional
     def get_transaction(self, book_id: int, all: bool) -> list[BookTransaction]:
-        
         if all:
             transaction = BookTransactionRepository(self.session).get_transactions(
                 book_id=book_id
