@@ -215,9 +215,10 @@ def seed_db_command():
             )
             book.on_loan = False
 
+            transaction.returned = True
             if (random.randint(1, 3) == 1):
-                transaction.returned = True
                 return;
+
             book_manage(book)
         
         for book in books:
