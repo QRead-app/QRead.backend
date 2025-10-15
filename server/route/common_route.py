@@ -126,8 +126,9 @@ def get_book():
     for n, book in enumerate(books):
         book_dict = book.to_dict()
         
-        book_dict["borrower_id"] = borrowers[n][0]
-        book_dict["borrower_name"] = borrowers[n][1]
+        if (borrowers[n] != '') :
+            book_dict["borrower_id"] = borrowers[n][0]
+            book_dict["borrower_name"] = borrowers[n][1]
 
         transactions_dict = []
         for transaction in transactions[n]:

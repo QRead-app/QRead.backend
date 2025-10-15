@@ -34,14 +34,17 @@ def issue_fine():
     try:
         book_id = Fine.str_to_int(book_id)
     except ConversionError as e:
-        return jsonify({"error": f"Invalid transaction id {book_id}"}), 400
+        return jsonify({"error": f"Invalid book id {book_id}"}), 400
         
     try:
         amount = Fine.str_to_decimal(amount)
     except ConversionError as e:
         return jsonify({"error": f"Invalid amount {amount}"}), 400
     
-    LibrarianService(g.Session).issue_fine(user_id, book_id, amount, reason)
+    try:
+        LibrarianService(g.Session).issue_fine(user_id, book_id, amount, reason)
+    except RecordNotFoundError:
+        return jsonify({"error": f"Book not borrowed by user"}), 400
     
     return jsonify({"message": "Fine issued successfully"}), 200
 
