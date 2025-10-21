@@ -125,10 +125,9 @@ class AdminService(BaseService):
             hasher.verify(user.password, password)
 
             user.password = hasher.hash(newpassword)
-        
         if (
             email is not None
-            and user.account_type == "ADMIN" 
+            and user.account_type.name == "ADMIN" 
         ):
             code = otp.generate_update_email_otp(email)
             mailer.send_otp(email, code)
