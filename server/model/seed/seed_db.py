@@ -163,8 +163,12 @@ def seed_db_command():
 
         # Seed book transactions and fines
         print("Seeding transactions, fines & book return...")
-
+        
         def book_manage(book: Book):
+            librarian = user_account_repo.get_user(
+                account_type=AccountType.LIBRARIAN,
+                account_state = AccountState.ACTIVE
+            )
             transaction_user = user_account_repo.get_user(
                 account_type=AccountType.BORROWER
             )
@@ -186,10 +190,14 @@ def seed_db_command():
 
             book.on_loan = True
             if due:
+                book.on_loan = False
+                transaction.returned = True
+                return_repo.insert_book_return(transaction.id, random.choice(librarian).id)
+
                 amount = random.randint(10, 50) / Decimal(10)
                 fine_repo.insert_fine(
                     transaction_user.id, transaction.id, amount, "Overdue")
-                return
+                return book_manage(book)
 
             # 24% Not returned and not overdue
             if (random.randint(1, 3) == 1):
@@ -197,17 +205,17 @@ def seed_db_command():
 
             # 52% Returned or fined  
             if (random.randint(1, 2) == 1):
+                book.on_loan = False
+                transaction.returned = True
+                return_repo.insert_book_return(transaction.id, random.choice(librarian).id)
+            
                 amount = random.randint(10, 50) / Decimal(10)
                 reason = fine_reason[random.randrange(len(fine_reason))]
                 
                 fine_repo.insert_fine(
                     transaction_user.id, transaction.id, amount, reason)
-                return
+                return book_manage(book)
 
-            librarian = user_account_repo.get_user(
-                account_type=AccountType.LIBRARIAN,
-                account_state = AccountState.ACTIVE
-            )
             librarian = random.choice(librarian)  
             return_repo.insert_book_return(
                 transaction.id,
@@ -217,7 +225,7 @@ def seed_db_command():
 
             transaction.returned = True
             if (random.randint(1, 3) == 1):
-                return;
+                return
 
             book_manage(book)
         
