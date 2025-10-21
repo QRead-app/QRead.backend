@@ -176,7 +176,6 @@ def update_email():
     
     if otp is None:
         return jsonify({"error": "Missing otp field"}), 400
-    breakpoint()
     try:
         AdminService(g.Session).verify_otp_email(otp, session["session"]["id"])
     except IncorrectCredentialsError:
