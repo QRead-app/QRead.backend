@@ -36,16 +36,17 @@ def due_date_reminder() -> None:
 
                 book = book_repo.get_book(id = transaction.book_id)
                 user = user_repo.get_user(id = transaction.user_id)
-                mailer.send_reminder(user[0].email, book[0], due_in.days)
+
+                if ('@email.com' not in user[0].email):
+                    mailer.send_reminder(user[0].email, book[0], due_in.days)
 
             for transaction in transactions:
                 due_in = transaction.due - now
-
-                if due_in.days == int(reminder_before_x):
-                    send_reminder(transaction)
-
+                
+                if (due_in.days < 0): continue
                 if (
-                    due_in.days < reminder_before_x 
-                    and due_in.days % reminder_every_x == 0 
+                    due_in.days == int(reminder_before_x)
+                    or (due_in.days < reminder_before_x 
+                    and (due_in.days - reminder_before_x) % reminder_every_x == 0) 
                 ):
                     send_reminder(transaction)
