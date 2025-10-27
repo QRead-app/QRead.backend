@@ -189,7 +189,7 @@ def return_book():
 @requires_auth(AccountType.LIBRARIAN)
 def update_account():
     data = request.json
-    # id = data.get("id") 
+    id = data.get("id") 
     # # name = data.get("name") 
     # # email = data.get("email") 
     password = data.get("password")
