@@ -190,8 +190,8 @@ def return_book():
 def update_account():
     data = request.json
     id = data.get("id") 
-    # # name = data.get("name") 
-    # # email = data.get("email") 
+    name = data.get("name") 
+    email = data.get("email") 
     password = data.get("password")
     newpassword = data.get("newpassword")
 
