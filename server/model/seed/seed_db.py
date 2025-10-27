@@ -140,6 +140,30 @@ def seed_db_command():
             "ACTIVE"
         )
 
+        user_account_repo.insert_user(
+            "borrower", 
+            "borrower@gmail.com", 
+            Hasher().hash("borrower"), 
+            "BORROWER",
+            "ACTIVE"
+        )
+
+        user_account_repo.insert_user(
+            "admin", 
+            "admin@gmail.com", 
+            Hasher().hash("admin"), 
+            "ADMIN",
+            "ACTIVE"
+        )
+
+        user_account_repo.insert_user(
+            "librarian", 
+            "librarian@gmail.com", 
+            Hasher().hash("librarian"), 
+            "LIBRARIAN",
+            "ACTIVE"
+        )
+
         # Seed books
         print("Seeding books...")
 
@@ -160,6 +184,14 @@ def seed_db_command():
             books.append(book)
 
         session.flush()
+
+        book_repo.insert_book(
+            'Finding Audrey', 
+            'From the #1 New York Times bestselling author of the Shopaholic series comes a terrific blend of comedy, romance, and psychological recovery in a contemporary YA novel sure to inspire and entertain. An anxiety disorder disrupts fourteen-year-old Audrey\'s daily life...', 
+            'Sophie Kinsella', 
+            BookCondition.VERY_GOOD,
+            image=random.choice(images)
+        )
 
         # Seed book transactions and fines
         print("Seeding transactions, fines & book return...")
