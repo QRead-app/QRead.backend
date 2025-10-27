@@ -71,7 +71,7 @@ class LibrarianService(BaseService):
     def update_book(self, id: int, new_book: Book) -> Book:
         old_book = BookRepository(self.session).get_book(id)[0]
 
-        for attr in ("title", "description", "author", "condition", "on_loan"):
+        for attr in ("title", "description", "author", "condition", "on_loan", "image"):
             val = getattr(new_book, attr)
             if val is not None:
                 setattr(old_book, attr, val)
