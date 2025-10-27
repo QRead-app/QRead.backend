@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import enum
 import re
 
@@ -45,7 +45,7 @@ class Base(DeclarativeBase):
     def str_to_decimal(str: str) -> Decimal:
         try:
             return Decimal(str)
-        except ValueError:
+        except InvalidOperation:
             raise ConversionError(f"Error converting {str} to Decimal")
 
 class User(Base):
