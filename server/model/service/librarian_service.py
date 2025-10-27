@@ -21,7 +21,11 @@ class LibrarianService(BaseService):
         fine_repo = FineRepository(self.session)
         transaction_repo = BookTransactionRepository(self.session)
 
-        transaction = transaction_repo.get_transactions(user_id=user_id, book_id=book_id)[0]
+        transaction = transaction_repo.get_transactions(user_id=user_id, book_id=book_id)
+
+        if (len(transaction) == 0):
+            raise RecordNotFoundError()
+        
         fine = fine_repo.insert_fine(user_id, transaction.id, amount, reason)
 
         return fine

@@ -163,6 +163,10 @@ def update_account():
         return jsonify({
             "error": "Old password is wrong"
         }), 400
+    except EmailAlreadyExistsError:
+        return jsonify({
+            "error": "Email already exists"
+        }), 400
 
     return jsonify({
         "message": "User updated"

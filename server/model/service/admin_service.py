@@ -129,6 +129,9 @@ class AdminService(BaseService):
             email is not None
             and user.account_type.name == "ADMIN" 
         ):
+            if (len(self.get_users(email=email)) > 0):
+                raise EmailAlreadyExistsError()
+            
             code = otp.generate_update_email_otp(email)
             mailer.send_otp(email, code)
             return user
