@@ -9,7 +9,7 @@ from server.model.repository.book_return_repository import BookReturnRepository
 from server.util.hasher import Hasher
 from ..db import DB
 from flask import Flask
-from .seeds import name, title, description, fine_reason, images
+from .seeds import name, title, description, fine_reason, images, custom_images
 from ..tables import *
 from ..repository.user_account_repository import UserAccountRepository
 from ..repository.book_repository import BookRepository
@@ -187,10 +187,34 @@ def seed_db_command():
 
         book_repo.insert_book(
             'Finding Audrey', 
-            'From the #1 New York Times bestselling author of the Shopaholic series comes a terrific blend of comedy, romance, and psychological recovery in a contemporary YA novel sure to inspire and entertain. An anxiety disorder disrupts fourteen-year-old Audrey\'s daily life...', 
+            'Finding Audrey is a young adult novel by Sophie Kinsella about a 14-year-old girl named Audrey who suffers from severe social anxiety after a traumatic bullying incident. Unable to leave the house, she wears dark glasses and avoids social contact until her brother\'s friend, Linus, starts to help her re-engage with the world. The book follows her journey toward recovery, exploring themes of mental health, family dynamics, and finding love and courage through humor and a supportive relationship.', 
             'Sophie Kinsella', 
             BookCondition.VERY_GOOD,
-            image=random.choice(images)
+            image=custom_images[0]
+        )
+
+        book_repo.insert_book(
+            'Finding Audrey', 
+            'Finding Audrey is a young adult novel by Sophie Kinsella about a 14-year-old girl named Audrey who suffers from severe social anxiety after a traumatic bullying incident. Unable to leave the house, she wears dark glasses and avoids social contact until her brother\'s friend, Linus, starts to help her re-engage with the world. The book follows her journey toward recovery, exploring themes of mental health, family dynamics, and finding love and courage through humor and a supportive relationship.', 
+            'Sophie Kinsella', 
+            BookCondition.VERY_GOOD,
+            image=custom_images[0]
+        )
+
+        book_repo.insert_book(
+            'Ikigai', 
+            'The Japanese Secret to a Long and Happy Life by Héctor García and Francesc Miralles is a book that explores the concept of ikigai, or a reason for being, and how it contributes to a long and fulfilling life. The book examines the habits of people in Okinawa, a Japanese village with one of the world\'s longest-living populations, to provide readers with practical tools to discover their own ikigai.', 
+            'Hector Garcia',
+            BookCondition.VERY_GOOD,
+            image=custom_images[1]
+        )
+
+        book_repo.insert_book(
+            'What Every Body Is Saying', 
+            'What Every BODY is Saying by Joe Navarro is a guide to reading nonverbal communication, based on the author\'s experience as an FBI counterintelligence officer. The book explains how to interpret body language to "speed-read" people, decode their true sentiments, avoid deception, and understand hidden motives. It emphasizes that body language is often more revealing than words and provides insights into universal behaviors, including those related to ancient survival instincts.', 
+            'Joe Navarro', 
+            BookCondition.VERY_GOOD,
+            image=custom_images[2]
         )
 
         # Seed book transactions and fines
