@@ -181,7 +181,7 @@ def return_book():
     except RecordNotFoundError:
         return jsonify({"error": f"Book id {book_id} not found"}), 404
     except BookBorrowingError:
-        return jsonify({"error": f"Book id {book_id} is not borrowed"}), 400
+        return jsonify({"message": f"Book id {book_id} is not borrowed"}), 200
     
     return jsonify({"message": "Book returned successfully"}), 200
 
