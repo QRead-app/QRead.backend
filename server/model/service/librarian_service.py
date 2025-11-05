@@ -26,7 +26,7 @@ class LibrarianService(BaseService):
         if (len(transaction) == 0):
             raise RecordNotFoundError()
         
-        fine = fine_repo.insert_fine(user_id, transaction.id, amount, reason)
+        fine = fine_repo.insert_fine(user_id, transaction[0].id, amount, reason)
 
         return fine
     
