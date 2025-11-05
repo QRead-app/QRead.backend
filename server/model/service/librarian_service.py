@@ -105,6 +105,9 @@ class LibrarianService(BaseService):
         if len(transaction) > 1:
             raise DatabaseError()
         
+        if book[0].on_loan == True:
+            raise BookBorrowingError()
+
         book[0].on_loan = False
         transaction[0].returned = True
 
